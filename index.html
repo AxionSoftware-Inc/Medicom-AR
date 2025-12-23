@@ -2,134 +2,66 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Aniq AR (6DoF)</title>
-    
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-hit-test-controls@2.0.0/dist/aframe-hit-test-controls.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Native AR (Aniq ishlaydi)</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 
     <style>
-        body { margin: 0; font-family: sans-serif; overflow: hidden; }
-
-        /* BUTUN EKRAN TUGMASI (Overlay) */
-        #overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 9999;
-            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-            pointer-events: none; /* Aralashmasligi uchun */
+        body { margin: 0; padding: 0; background-color: #222; font-family: sans-serif; }
+        
+        /* Model Viewer oynasi */
+        model-viewer {
+            width: 100%; height: 80vh;
+            background-color: #222; /* Oq fonni yo'qotdik */
         }
 
-        /* Start tugmasi */
-        #start-btn {
-            pointer-events: auto;
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            padding: 20px 40px; font-size: 24px; font-weight: bold;
-            background: #007bff; color: white; border: none; border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
-        }
-
-        /* Joylashtirish tugmasi */
-        #place-btn {
-            pointer-events: auto;
-            margin-bottom: 50px; padding: 15px 50px;
+        /* Biz yasagan maxsus tugma */
+        .custom-ar-button {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background-color: #28a745; color: white;
+            padding: 15px 40px; border-radius: 50px; border: none;
             font-size: 20px; font-weight: bold;
-            background: #28a745; color: white; border: none; border-radius: 50px;
-            display: none; /* Avvaliga ko'rinmaydi */
-            border: 2px solid white;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; cursor: pointer; text-decoration: none;
         }
 
-        #info {
-            position: fixed; top: 20px; width: 100%; text-align: center;
-            color: yellow; font-weight: bold; text-shadow: 1px 1px 2px black;
-            z-index: 10000; display: none;
+        .custom-ar-button:active { transform: translateX(-50%) scale(0.95); }
+        
+        .hint {
+            color: #aaa; text-align: center; margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div id="info">Pol qidirilmoqda... <br> (Telefonni sekin aylantiring)</div>
+    <p class="hint">Pastdagi yashil tugmani bosing 👇</p>
 
-    <div id="overlay">
-        <button id="start-btn" onclick="startAR()">KAMERANI OCHISH 📸</button>
-        <button id="place-btn" onclick="placeModel()">MODELNI QO'YISH 📍</button>
-    </div>
+    <model-viewer 
+        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+        ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+        alt="Astronavt"
+        ar
+        ar-modes="scene-viewer webxr quick-look"
+        camera-controls
+        auto-rotate
+        shadow-intensity="1">
 
-    <a-scene webxr="requiredFeatures: hit-test; optionalFeatures: dom-overlay; overlayElement: #overlay"
-             vr-mode-ui="enabled: false"
-             renderer="alpha: true; antialias: true; physicalLights: true;">
-        
-        <a-light type="directional" intensity="1" position="-1 2 1"></a-light>
-        <a-light type="ambient" intensity="0.5"></a-light>
+        <button slot="ar-button" class="custom-ar-button">
+            KAMERADA KO'RISH 📸
+        </button>
 
-        <a-entity id="reticle" ar-hit-test="target: #my-model; type: map" visible="false">
-            <a-ring rotation="-90 0 0" radius-inner="0.15" radius-outer="0.2" color="white"></a-ring>
-            <a-circle rotation="-90 0 0" radius="0.05" color="white"></a-circle>
-        </a-entity>
-
-        <a-entity id="my-model" visible="false">
-            <a-box position="0 0.5 0" color="red" scale="0.5 0.5 0.5"></a-box>
-            <a-sphere position="0 1.2 0" radius="0.3" color="yellow"></a-sphere>
-            <a-text value="Men shu yerdaman!" position="0 1.8 0" align="center" scale="2 2 2" color="white"></a-text>
-        </a-entity>
-
-    </a-scene>
+    </model-viewer>
 
     <script>
-        const scene = document.querySelector('a-scene');
-        const startBtn = document.getElementById('start-btn');
-        const placeBtn = document.getElementById('place-btn');
-        const reticle = document.getElementById('reticle');
-        const model = document.getElementById('my-model');
-        const info = document.getElementById('info');
-
-        function startAR() {
-            // WebXR AR sessiyasini boshlash
-            scene.enterVR(); 
-            startBtn.style.display = 'none';
-            info.style.display = 'block';
-        }
-
-        // Sessiya boshlanganda
-        scene.addEventListener('enter-vr', () => {
-            // Har 0.1 sekundda tekshiramiz: Pol topildimi?
-            setInterval(() => {
-                // Agar reticle (nishon) ko'rinsa va model hali qo'yilmagan bo'lsa
-                if (reticle.object3D.visible && !model.getAttribute('visible')) {
-                    placeBtn.style.display = 'block';
-                    info.innerText = "Nishon topildi! Tugmani bosing.";
-                    info.style.color = "#00ff00";
-                } else if (!reticle.object3D.visible) {
-                    placeBtn.style.display = 'none';
-                    if(!model.getAttribute('visible')) {
-                        info.innerText = "Pol qidirilmoqda...";
-                        info.style.color = "yellow";
-                    }
-                }
-            }, 100);
+        const viewer = document.querySelector("model-viewer");
+        
+        // Agar tugma bosilganda AR ochilmasa, demak telefon qo'llamaydi
+        viewer.addEventListener('ar-status', (event) => {
+            if(event.detail.status === 'failed'){
+                alert("Kechirasiz, telefoningizning Google Play Services AR tizimi yangilanmagan.");
+            }
         });
-
-        function placeModel() {
-            if (!reticle.object3D.visible) return;
-
-            // 1. Nishon turgan joyni olamiz
-            const pos = reticle.getAttribute('position');
-            const rot = reticle.getAttribute('rotation');
-
-            // 2. Modelni o'sha yerga qo'yamiz
-            model.setAttribute('position', pos);
-            model.setAttribute('rotation', {x: 0, y: rot.y, z: 0}); // Faqat Y o'qi bo'yicha buramiz
-            
-            // 3. Ko'rsatamiz
-            model.setAttribute('visible', 'true');
-
-            // 4. Reticleni o'chiramiz (hit-testni to'xtatamiz)
-            reticle.removeAttribute('ar-hit-test');
-            reticle.setAttribute('visible', 'false');
-
-            // 5. UI ni tozalaymiz
-            placeBtn.style.display = 'none';
-            info.innerText = "Model joylashtirildi. Endi yuring!";
-        }
     </script>
 </body>
 </html>
