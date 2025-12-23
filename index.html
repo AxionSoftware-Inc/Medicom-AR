@@ -1,102 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Uyda Test: Navigatsiya</title>
+    <title>O'rdakli Yo'lak</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
 
-    <div style="position: fixed; top: 10px; width: 100%; text-align: center; z-index: 999;">
-        <select id="rooms" style="font-size: 20px; padding: 10px;">
-            <option value="" disabled selected>Qayerga boramiz?</option>
-            <option value="oshxona">Oshxona</option>
-            <option value="bedroom">Yotoqxona</option>
-        </select>
-        <button onclick="startNav()" style="font-size: 20px; padding: 10px;">KETDIK</button>
+    <div style="position: fixed; top: 20px; width: 100%; text-align: center; z-index: 999; color: white; font-family: sans-serif; font-weight: bold; text-shadow: 2px 2px 4px #000;">
+        <h1>O'rdaklarni kuzating! 🦆</h1>
     </div>
 
     <a-scene vr-mode-ui="false" renderer="logarithmicDepthBuffer: true;">
         
         <a-assets>
-            <a-asset-item id="my-arrow" src="./arrow.glb"></a-asset-item>
+            <a-asset-item id="duck-model" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
         </a-assets>
 
         <a-entity id="camera-rig">
             <a-entity id="camera" camera look-controls></a-entity>
         </a-entity>
 
-        <a-entity id="arrow-wrapper" visible="false">
-            <a-entity 
-                gltf-model="#my-arrow" 
-                position="0 -0.5 -2" 
-                scale="0.5 0.5 0.5"
-                animation="property: position; to: 0 -0.3 -2; dir: alternate; dur: 1000; loop: true"> 
-                </a-entity>
-            
-            <a-text id="label-text" value="" color="black" position="0 0.5 -2" align="center" scale="2 2 2"></a-text>
+        <a-entity 
+            gltf-model="#duck-model" 
+            position="0 -0.5 0.5" 
+            scale="0.5 0.5 0.5"
+            rotation="0 180 0"
+            animation="property: position; to: 0 -0.3 0.5; dir: alternate; dur: 1000; loop: true">
+            <a-text value="Orqaga buril!" align="center" color="red" position="0 2 0" scale="3 3 3" look-at="#camera"></a-text>
+        </a-entity>
+
+        <a-entity 
+            gltf-model="#duck-model" 
+            position="0 -0.5 1.0" 
+            scale="0.5 0.5 0.5"
+            rotation="0 180 0">
+        </a-entity>
+
+        <a-entity 
+            gltf-model="#duck-model" 
+            position="0 -0.5 1.5" 
+            scale="0.5 0.5 0.5"
+            rotation="0 90 0">
+             <a-text value="O'ngga ->" align="center" color="yellow" position="0 2 0" scale="3 3 3" look-at="#camera"></a-text>
+        </a-entity>
+
+        <a-entity 
+            gltf-model="#duck-model" 
+            position="-1.5 -0.5 1.5" 
+            scale="0.5 0.5 0.5"
+            rotation="0 90 0">
+        </a-entity>
+
+        <a-entity 
+            gltf-model="#duck-model" 
+            position="-3.0 -0.5 1.5" 
+            scale="0.8 0.8 0.8"
+            rotation="0 45 0"
+            animation="property: rotation; to: 0 405 0; dur: 4000; loop: true; easing: linear">
+            <a-text value="Manzil!" align="center" color="#00ff00" position="0 2.5 0" scale="4 4 4" look-at="#camera"></a-text>
         </a-entity>
 
     </a-scene>
-
-    <script>
-        // --- UYINGIZ UCHUN SOZLAMALAR ---
-        
-        // 1. KOMPASNI TO'G'IRLASH (Offset)
-        // Telefoningizdagi kompas ilovasini oching.
-        // Uyingizning koridoriga qarab turing. 
-        // Agar kompas "North (0°)" ko'rsatmasa, qancha farq borligini shu yerga yozasiz.
-        // Hozircha 0 da tursin, test qilib ko'rib o'zgartirasiz.
-        const CORRIDOR_OFFSET = 0; 
-
-        // 2. XONALAR RO'YXATI
-        const db = {
-            'oshxona': { label: "Oshxona (Oldinda)" },
-            'bedroom': { label: "Yotoqxona (Orqada)" }
-        };
-
-        function startNav() {
-            const val = document.getElementById('rooms').value;
-            if(!val) return alert("Xonani tanlang!");
-
-            // Ruxsat so'rash (iOS 13+ uchun kerak, Androidda avtomatik)
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission()
-                    .then(response => {
-                        if (response == 'granted') init(val);
-                        else alert("Ruxsat berilmadi!");
-                    })
-                    .catch(console.error);
-            } else {
-                init(val);
-            }
-        }
-
-        function init(targetId) {
-            const arrow = document.getElementById('arrow-wrapper');
-            const text = document.getElementById('label-text');
-            const targetData = db[targetId];
-
-            arrow.setAttribute('visible', 'true');
-            text.setAttribute('value', targetData.label);
-
-            window.addEventListener('deviceorientation', function(event) {
-                let alpha = event.alpha || 0; // Kompas (0-360)
-                
-                // MANTIQ:
-                // Agar 'oshxona' tanlansa, strelka 0 gradusga (Shimolga) qaraydi
-                // Agar 'bedroom' tanlansa, strelka 180 gradusga (Janubga) qaraydi
-                // Bu oddiy test uchun. Real loyihada xonaning haqiqiy gradusini yozamiz.
-                
-                let targetAngle = (targetId === 'oshxona') ? 0 : 180;
-                
-                // Strelkani to'g'ri burish formulasi:
-                // Maqsad gradusi - Telefon gradusi + Kalibrovka
-                let rotationY = targetAngle - alpha + CORRIDOR_OFFSET;
-                
-                arrow.setAttribute('rotation', `0 ${rotationY} 0`);
-            });
-        }
-    </script>
 </body>
 </html>
