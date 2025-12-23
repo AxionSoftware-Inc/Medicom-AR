@@ -1,75 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="uz">
 <head>
-    <title>AR.js Navigatsiya (Barqaror)</title>
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Kasalxona Navigatsiyasi (Markersiz)</title>
     
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-hit-test-controls@2.0.0/dist/aframe-hit-test-controls.min.js"></script>
+
     <style>
-        body { margin: 0; overflow: hidden; font-family: monospace; }
+        body { margin: 0; font-family: sans-serif; }
         
-        #ui {
-            position: fixed; top: 10px; width: 100%; 
-            text-align: center; z-index: 100; display: block;
+        /* UI Ekrani (Kamera ustida) */
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5; pointer-events: none;
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            padding-bottom: 40px;
         }
-        
-        .msg {
-            background: rgba(0,0,0,0.7); color: yellow; 
-            padding: 10px; border-radius: 10px; font-size: 16px;
+
+        .btn {
+            pointer-events: auto;
+            background: #007bff; color: white; border: none;
+            padding: 15px 40px; font-size: 18px; font-weight: bold; border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: none; transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        #msg {
+            background: rgba(0, 0, 0, 0.6); color: white; 
+            padding: 10px 20px; border-radius: 20px; margin-bottom: 20px;
+            text-align: center; font-size: 16px; width: 80%;
+        }
+
+        /* Start tugmasi (Eng boshida chiqadi) */
+        #start-ar-btn {
+            display: block; pointer-events: auto;
+            background: #28a745; margin-bottom: 50%;
         }
     </style>
 </head>
-<body style="margin: 0; overflow: hidden;">
+<body>
 
-    <div id="ui">
-        <span class="msg">Kamerani "HIRO" rasmiga qarating</span>
+    <div id="overlay">
+        <div id="msg">Navigatsiyani boshlash uchun tugmani bosing</div>
+        <button id="start-ar-btn" class="btn" onclick="startSession()">AR BOSHLASH 🚀</button>
+        <button id="place-path-btn" class="btn" onclick="placePath()">Yo'lni chizish 📍</button>
     </div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" 
+    <a-scene webxr="requiredFeatures: hit-test; optionalFeatures: dom-overlay; overlayElement: #overlay;" 
              vr-mode-ui="enabled: false"
-             renderer="logarithmicDepthBuffer: true;">
+             renderer="colorManagement: true; physicallyCorrectLights: true;">
+        
+        <a-light type="ambient" intensity="1"></a-light>
+        <a-light type="directional" position="-1 2 1" intensity="1.5"></a-light>
 
-        <a-marker preset="hiro" id="my-marker">
+        <a-entity id="reticle" ar-hit-test="target: #path-root; type: map">
+            <a-ring rotation="-90 0 0" radius-inner="0.1" radius-outer="0.15" color="white" opacity="0.8">
+                <a-circle radius="0.05" color="#007bff"></a-circle>
+            </a-ring>
+        </a-entity>
+
+        <a-entity id="path-root" visible="false" position="0 0 0">
             
-            <a-box position="0 0.5 0" material="color: red; opacity: 0.5;" scale="0.5 0.5 0.5" animation="property: rotation; to: 0 360 0; loop: true; dur: 5000"></a-box>
-            <a-text value="START NUQTASI" position="0 1 0" align="center" color="red" scale="2 2 2" rotation="-90 0 0"></a-text>
+            <a-cylinder color="green" height="0.1" radius="0.3"></a-cylinder>
+            <a-text value="START" position="0 0.5 0" align="center" color="green" scale="2 2 2" look-at="[camera]"></a-text>
 
-            <a-entity position="0 0 1">
-                <a-cone radius-bottom="0.1" height="0.3" color="yellow" rotation="90 0 0"></a-cone>
-            </a-entity>
-            <a-entity position="0 0 2">
-                <a-cone radius-bottom="0.1" height="0.3" color="yellow" rotation="90 0 0"></a-cone>
-            </a-entity>
-            <a-entity position="0 0 3">
-                <a-cone radius-bottom="0.1" height="0.3" color="yellow" rotation="90 0 0"></a-cone>
-            </a-entity>
+            <a-entity id="arrow-container"></a-entity>
 
-            <a-entity position="1 0 3">
-                 <a-box color="green" scale="0.5 0.5 0.5"></a-box>
-                 <a-text value="MANZIL" position="0 0.6 0" align="center" color="green" scale="2 2 2" rotation="-90 0 0"></a-text>
-            </a-entity>
+            <a-box position="0 0 -30" color="red" scale="0.5 2 0.5"></a-box>
+            <a-text value="MANZIL (30m)" position="0 2.5 -30" align="center" color="red" scale="4 4 4" look-at="[camera]"></a-text>
 
-        </a-marker>
+        </a-entity>
 
-        <a-entity camera></a-entity>
+        <a-camera position="0 1.6 0"></a-camera>
     </a-scene>
 
     <script>
-        // Markerni ko'rganda xabar berish
-        const marker = document.querySelector("#my-marker");
-        const ui = document.querySelector(".msg");
+        const scene = document.querySelector('a-scene');
+        const reticle = document.getElementById('reticle');
+        const pathRoot = document.getElementById('path-root');
+        const arrowContainer = document.getElementById('arrow-container');
+        
+        // 30 metrga strelka chizish funksiyasi
+        function createArrows() {
+            for(let i=1; i<=20; i++) { // Har 1.5 metrda bitta strelka
+                let zPos = -i * 1.5;
+                
+                // Strelka (Konus)
+                let arrow = document.createElement('a-cone');
+                arrow.setAttribute('position', `0 0.1 ${zPos}`);
+                arrow.setAttribute('rotation', '90 0 0'); // Yerga yotqizish
+                arrow.setAttribute('radius-bottom', '0.2');
+                arrow.setAttribute('height', '0.5');
+                arrow.setAttribute('color', '#007bff');
+                arrow.setAttribute('opacity', '0.8');
+                
+                // Kichik animatsiya
+                arrow.setAttribute('animation', `property: opacity; from: 0.4; to: 1; dur: 1000; dir: alternate; loop: true; delay: ${i*100}`);
 
-        marker.addEventListener("markerFound", (e) => {
-            ui.innerText = "Marker topildi! Endi harakatlaning.";
-            ui.style.color = "#00ff00";
+                arrowContainer.appendChild(arrow);
+            }
+        }
+
+        createArrows();
+
+        function startSession() {
+            document.getElementById('start-ar-btn').style.display = 'none';
+            scene.enterVR(); // AR rejimga kirish
+        }
+
+        // WebXR ishga tushganda
+        scene.addEventListener('enter-vr', function () {
+            document.getElementById('msg').innerText = "Kamerani polga qarating va biroz harakatlantiring...";
+            
+            // Reticle (nishon) paydo bo'lishini kutamiz
+            // Hit-test komponenti o'zi polni qidiradi
+            const checkReticle = setInterval(() => {
+                if (reticle.object3D.visible) {
+                    document.getElementById('place-path-btn').style.display = 'block';
+                    document.getElementById('msg').innerText = "Nishon paydo bo'ldi! Start joyini belgilang.";
+                    clearInterval(checkReticle);
+                }
+            }, 500);
         });
 
-        marker.addEventListener("markerLost", (e) => {
-            ui.innerText = "Marker yo'qoldi. HIRO rasmini ko'rsating.";
-            ui.style.color = "yellow";
-        });
+        // Yo'lni joylashtirish
+        function placePath() {
+            if (!reticle.object3D.visible) return;
+
+            // 1. Nishon turgan joyni olamiz
+            const pos = reticle.getAttribute('position');
+            const rot = reticle.getAttribute('rotation');
+
+            // 2. Yo'lni o'sha yerga qo'yamiz
+            pathRoot.setAttribute('position', pos);
+            
+            // Muhim: Biz yo'lni foydalanuvchi qarab turgan tomonga burishimiz kerak
+            // Hozircha oddiy qilib joylashtiramiz. 
+            // Idealda: pathRoot.object3D.rotation.y = camera.rotation.y;
+            
+            // 3. Ko'rsatamiz
+            pathRoot.setAttribute('visible', 'true');
+            reticle.setAttribute('visible', 'false'); // Nishonni o'chiramiz
+            
+            // 4. UI o'zgarishi
+            document.getElementById('place-path-btn').style.display = 'none';
+            document.getElementById('msg').innerText = "Strelkalar bo'ylab yuring!";
+        }
     </script>
 </body>
 </html>
