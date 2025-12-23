@@ -2,145 +2,189 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Navigatsiya (WebXR)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Indoor Navigatsiya (Fixed UI)</title>
+    
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
 
     <style>
-        body { font-family: sans-serif; }
-        
-        /* WebXR uchun Overlay (Tugmalar AR ustida chiqishi uchun) */
-        #overlay {
-            position: absolute; 
-            z-index: 1000; 
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; /* Bosishlarni o'tkazib yuborish */
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            padding-bottom: 50px;
+        body { margin: 0; overflow: hidden; font-family: sans-serif; background-color: black; }
+
+        /* 1. Orqa fon kamerasi (HTML Video) */
+        #camera-feed {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -1;
         }
 
-        /* Tugma stillari */
-        .ar-btn {
-            pointer-events: auto; /* Tugmani bosish mumkin bo'lsin */
-            background: rgba(40, 167, 69, 0.9);
-            color: white;
-            border: 2px solid white;
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 50px;
-            margin-bottom: 20px;
-            display: none; /* Boshida yashirin */
+        /* 2. UI Qatlami (Eng ustida bo'lishi SHART) */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 9999; /* A-Frame canvasidan baland bo'lishi kerak */
+            pointer-events: none; /* Bo'sh joyni bosganda 3D sahnaga o'tkazib yuborish */
+            display: flex; flex-direction: column; justify-content: space-between;
         }
 
-        #start-btn {
-            display: block; /* Boshlash tugmasi ko'rinib turadi */
-            background: #007bff;
-            margin-bottom: 50%;
+        /* Bosiladigan elementlar uchun pointer-events ni yoqamiz */
+        .clickable { pointer-events: auto !important; }
+
+        /* Start oynasi */
+        #start-screen {
+            background: rgba(0,0,0,0.8);
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; text-align: center;
         }
 
-        #info-box {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            color: yellow;
-            padding: 10px 20px;
-            border-radius: 15px;
-            font-size: 16px;
-            pointer-events: none;
-            text-align: center;
-            width: 80%;
+        /* Navigatsiya paneli */
+        #nav-controls {
+            padding: 20px; text-align: center; display: none;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        }
+
+        button {
+            background: #28a745; color: white; border: none; 
+            padding: 15px 40px; font-size: 18px; font-weight: bold; 
+            border-radius: 50px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,255,0,0.3);
+            margin-top: 10px;
+        }
+        button:active { transform: scale(0.95); }
+
+        .info-card {
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff; padding: 10px 20px; border-radius: 20px;
+            margin-top: 20px; border: 1px solid #444;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
 
-    <div id="overlay">
-        <div id="info-box">AR sessiyasini boshlash uchun tugmani bosing</div>
+    <video id="camera-feed" autoplay playsinline muted></video>
+
+    <div id="ui-layer">
         
-        <button id="start-btn" class="ar-btn" onclick="startAR()">AR BOSHLASH 🚀</button>
-        <button id="next-btn" class="ar-btn" onclick="nextStep()">Manzilga keldim (Keyingi) 👉</button>
-        <button id="reset-btn" class="ar-btn" onclick="location.reload()" style="background: red; display: none;">Qayta boshlash 🔄</button>
+        <div style="text-align: center;">
+            <div id="instruction" class="info-card clickable">
+                1-QADAM: Orqaga (180°) buriling
+            </div>
+        </div>
+
+        <div id="nav-controls" class="clickable">
+            <p style="color: yellow; margin-bottom: 10px;" id="dist-text">Manzilgacha: 5 metr</p>
+            <button onclick="nextStep()" id="action-btn">SHU YERGA KELDIM ✅</button>
+        </div>
+
+        <div id="start-screen" class="clickable">
+            <h1>📍 Navigatsiya</h1>
+            <p>Kamera va Kompasni ishga tushirish</p>
+            <button onclick="startApp()">BOSHLASH</button>
+        </div>
+
+        <div class="clickable" style="position: absolute; top: 10px; right: 10px;">
+            <input type="range" min="0" max="360" value="0" oninput="rotateScene(this.value)" style="width: 100px;">
+            <div style="color:white; font-size:10px; text-align:right">To'g'irlash</div>
+        </div>
     </div>
 
-    <a-scene 
-        webxr="optionalFeatures: dom-overlay; overlayElement: #overlay;" 
-        vr-mode-ui="enabled: false"
-        renderer="colorManagement: true; physicallyCorrectLights: true;">
+    <a-scene embedded vr-mode-ui="enabled: false" 
+             renderer="alpha: true; antialias: true;"
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
 
-        <a-light type="ambient" intensity="1"></a-light>
-        <a-light type="directional" position="1 1 1" intensity="1.5"></a-light>
+        <a-entity id="camera-rig" rotation="0 0 0">
+            <a-camera position="0 1.6 0" look-controls="enabled: true; touchEnabled: false;" wasd-controls="enabled: false"></a-camera>
+        </a-entity>
 
-        <a-entity id="world-root" position="0 0 0" rotation="0 180 0">
+        <a-entity id="world-container">
             
-            <a-entity id="step-1">
-                <a-box position="0 -1.5 0" color="red" scale="0.2 0.2 0.2"></a-box>
-                <a-text value="START" position="0 -1.0 0" color="red" align="center" scale="1.5 1.5 1.5" look-at="[camera]"></a-text>
+            <a-entity id="step-1-group">
+                <a-text value="START" position="0 0 -1" color="red" align="center" scale="2 2 2" look-at="[camera]"></a-text>
+                
+                <a-box position="0 -1 -2" color="red" scale="0.2 0.2 0.2"></a-box>
+                <a-box position="0 -1 -3" color="red" scale="0.2 0.2 0.2"></a-box>
+                <a-box position="0 -1 -4" color="red" scale="0.2 0.2 0.2"></a-box>
 
-                <a-box position="0 -1.5 1" color="#ff4444" scale="0.1 0.1 0.1" opacity="0.8"></a-box>
-                <a-box position="0 -1.5 2" color="#ff4444" scale="0.1 0.1 0.1" opacity="0.8"></a-box>
-                <a-box position="0 -1.5 3" color="#ff4444" scale="0.1 0.1 0.1" opacity="0.8"></a-box>
-
-                <a-cone position="0 -1.5 3.5" rotation="0 0 180" radius-bottom="0.1" height="0.3" color="yellow"></a-cone>
-                <a-text value="Burilish" position="0 -1.0 3.5" color="yellow" align="center" scale="1.5 1.5 1.5" look-at="[camera]"></a-text>
+                <a-cylinder position="0 -1 -5" radius="0.5" height="0.1" color="yellow"></a-cylinder>
+                <a-text value="ESHIK" position="0 0.5 -5" color="yellow" align="center" scale="3 3 3" look-at="[camera]"></a-text>
             </a-entity>
 
-            <a-entity id="step-2" visible="false">
-                <a-sphere position="-1 -1.5 3.5" radius="0.1" color="green"></a-sphere>
-                <a-sphere position="-2 -1.5 3.5" radius="0.1" color="green"></a-sphere>
-                <a-sphere position="-3 -1.5 3.5" radius="0.1" color="green"></a-sphere>
+            <a-entity id="step-2-group" visible="false">
+                <a-text value="O'NGGA ->" position="0 0 -2" color="#00ff00" align="center" scale="2 2 2" look-at="[camera]"></a-text>
+                
+                <a-sphere position="1 -1 -2" radius="0.1" color="green"></a-sphere>
+                <a-sphere position="2 -1 -2" radius="0.1" color="green"></a-sphere>
+                <a-sphere position="3 -1 -2" radius="0.1" color="green"></a-sphere>
 
-                <a-box position="-3.5 -1.0 3.5" color="#00ff00" scale="0.4 0.4 0.4" 
-                       animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"></a-box>
-                <a-text value="MANZIL" position="-3.5 -0.3 3.5" color="white" align="center" scale="2 2 2" look-at="[camera]"></a-text>
+                <a-box position="4 -1 -2" color="blue" animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-box>
+                <a-text value="FINISH" position="4 0.5 -2" color="blue" align="center" scale="3 3 3" look-at="[camera]"></a-text>
             </a-entity>
 
-        </a-entity> <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        </a-entity>
     </a-scene>
 
     <script>
         let currentStep = 1;
-        const scene = document.querySelector('a-scene');
 
-        function startAR() {
-            // WebXR sessiyasini boshlash (A-Frame avtomatik qiladi, biz faqat UI ni o'zgartiramiz)
-            document.querySelector('a-scene').enterVR(); // enterVR bu aslida AR rejimini ham yoqadi (agar sozlangan bo'lsa)
-            
-            document.getElementById('start-btn').style.display = 'none';
-            document.getElementById('next-btn').style.display = 'block';
-            document.getElementById('info-box').innerText = "Orqaga 180° buriling va qizil kublar bo'ylab yuring";
-            
-            // World rootni to'g'irlash (Start bosilganda 180 gradusga burib qo'yamiz, chunki siz 'orqaga' dedingiz)
-            // Lekin WebXR da kamera pozitsiyasi startda 0,0,0 bo'ladi.
+        async function startApp() {
+            // 1. UI ni o'zgartirish
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('nav-controls').style.display = 'block';
+
+            // 2. Kamerani yoqish (Video tegiga ulash)
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: { exact: "environment" } } // Orqa kamera
+                });
+                document.getElementById('camera-feed').srcObject = stream;
+            } catch (err) {
+                // Agar 'environment' kamerasi topilmasa, oddiy rejimda ochish
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    document.getElementById('camera-feed').srcObject = stream;
+                } catch (e) {
+                    alert("Kameraga ruxsat bering!");
+                }
+            }
+
+            // 3. Sensorlarga ruxsat (iOS uchun)
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response == 'granted') {
+                            // Ruxsat berildi
+                        }
+                    })
+                    .catch(console.error);
+            }
         }
-
-        // WebXR sessiyasi boshlanganda event
-        scene.addEventListener('enter-vr', function () {
-            document.getElementById('info-box').innerText = "Kamera faollashdi. Atrofni skaner qiling.";
-        });
 
         function nextStep() {
             if (currentStep === 1) {
-                // 1-bosqich tugadi, 2-bosqichni yoqamiz
-                document.getElementById('step-1').setAttribute('visible', 'false');
-                document.getElementById('step-2').setAttribute('visible', 'true');
+                // 1. UI o'zgarishi
+                document.getElementById('instruction').innerText = "2-QADAM: O'ngga qarab yuring";
+                document.getElementById('dist-text').innerText = "Manzilgacha: 3 metr";
+                document.getElementById('action-btn').innerText = "YETIB KELDIM 🏁";
+
+                // 2. 3D Olamni o'zgartirish
+                document.getElementById('step-1-group').setAttribute('visible', 'false');
+                document.getElementById('step-2-group').setAttribute('visible', 'true');
+
+                // 3. "Teleport" qilish (muhim joyi)
+                // Foydalanuvchi jismonan yurdi, lekin telefon buni bilmaydi.
+                // Biz 2-bosqich obyektlarini shunday joylashtirdik-ki, 
+                // ular foydalanuvchi "Eshik" oldida turganda to'g'ri ko'rinadi.
                 
-                document.getElementById('info-box').innerText = "Endi o'ngga qarab yuring (Yashil sharlar)";
-                document.getElementById('next-btn').innerText = "Yetib keldim ✅";
                 currentStep = 2;
             } else {
-                // Tugadi
-                document.getElementById('info-box').innerText = "Tabriklaymiz! Manzildasiz.";
-                document.getElementById('next-btn').style.display = 'none';
-                document.getElementById('reset-btn').style.display = 'block';
+                alert("Tabriklaymiz! Manzilga yetdingiz.");
+                location.reload();
             }
+        }
+
+        function rotateScene(val) {
+            // Agar kompas noto'g'ri ko'rsatsa, qo'lda to'g'irlash
+            document.getElementById('world-container').setAttribute('rotation', `0 ${val} 0`);
         }
     </script>
 </body>
