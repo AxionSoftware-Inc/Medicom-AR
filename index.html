@@ -3,99 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kasalxona Navigatsiyasi (Markersiz)</title>
+    <title>Native AR Test</title>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: #f5f5f5; }
+        body { margin: 0; background-color: #eee; font-family: sans-serif; }
         
-        .container { padding: 20px; text-align: center; }
-        
-        .card {
-            background: white; border-radius: 15px; padding: 20px;
-            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .container {
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; height: 100vh;
         }
 
-        h2 { margin-top: 0; color: #333; }
-        p { color: #666; font-size: 14px; }
-
-        /* Model Viewer yashirin turadi, kerak bo'lganda ochiladi */
+        /* Model Viewer ekranni egallaydi */
         model-viewer {
-            width: 100%; height: 400px;
-            background-color: #eee;
-            border-radius: 10px;
-            margin-top: 10px;
+            width: 100%; height: 80%;
+            background-color: #fff;
+            border-radius: 20px;
         }
 
         .ar-btn {
-            background: #007bff; color: white; border: none;
-            padding: 12px 25px; border-radius: 25px;
-            font-size: 16px; font-weight: bold; cursor: pointer;
-            width: 100%; margin-top: 10px; display: block; text-decoration: none;
-            text-align: center;
-        }
-
-        .location-img {
-            width: 100%; height: 150px; object-fit: cover; border-radius: 10px;
-            background: #ddd; margin-bottom: 10px;
+            margin-top: 20px;
+            padding: 15px 40px; font-size: 20px; font-weight: bold;
+            background-color: #28a745; color: white; border: none; border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🏥 Navigatsiya</h1>
-        <p>Qayerga bormoqchisiz?</p>
+        <h3>1. Pastdagi tugmani bosing<br>2. Polni ko'rsating</h3>
+        
+        <model-viewer 
+            src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+            ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+            alt="AR Test"
+            ar 
+            ar-modes="scene-viewer webxr quick-look" 
+            camera-controls 
+            auto-rotate
+            shadow-intensity="1">
 
-        <div class="card">
-            <div class="location-img" style="display:flex;align-items:center;justify-content:center;color:#777;">
-                (Registratsiya rasmi)
-            </div>
-            <h2>Xirurgiya (30m)</h2>
-            <p>1. Registratsiya yonida turing.<br>2. Yo'lakka qarab tugmani bosing.</p>
-            
-            <model-viewer 
-                id="viewer-1"
-                src="https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"
-                ar ar-modes="scene-viewer webxr quick-look"
-                camera-controls
-                scale="0.2 0.05 30" 
-                shadow-intensity="1">
-                
-                <button slot="ar-button" class="ar-btn">
-                    XIRURGIYAGA YO'L 🚀
-                </button>
-            </model-viewer>
-        </div>
+            <button slot="ar-button" class="ar-btn">
+                AR KAMERANI OCHISH 🚀
+            </button>
 
-        <div class="card">
-            <h2>Laboratoriya (Chapda)</h2>
-            <p>1. Lift oldida turing.<br>2. Chapga qarab tugmani bosing.</p>
-            
-            <model-viewer 
-                id="viewer-2"
-                src="https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"
-                ar ar-modes="scene-viewer webxr quick-look"
-                camera-controls
-                scale="0.2 0.05 20" 
-                shadow-intensity="1">
-                
-                <button slot="ar-button" class="ar-btn" style="background:#28a745">
-                    LABORATORIYAGA YO'L 🧪
-                </button>
-            </model-viewer>
-        </div>
-
+        </model-viewer>
     </div>
 
     <script>
-        // Qo'shimcha mantiq: Agar telefon qo'llab-quvvatlamasa ogohlantirish
-        document.querySelectorAll('model-viewer').forEach(viewer => {
-            viewer.addEventListener('ar-status', (event) => {
-                if(event.detail.status === 'failed'){
-                    alert("Kechirasiz, telefoningizda Native AR ishlamayapti.");
-                }
-            });
+        const viewer = document.querySelector("model-viewer");
+        
+        // Xatolik bo'lsa ekranga chiqaramiz
+        viewer.addEventListener('error', (e) => {
+            alert("Model yuklashda xato bo'ldi! Internetni tekshiring.");
+            console.log(e);
+        });
+
+        viewer.addEventListener('ar-status', (event) => {
+            if(event.detail.status === 'failed'){
+                alert("Kamera ochilmadi. Telefoningiz AR ni qo'llamaydi yoki HTTPS yo'q.");
+            }
         });
     </script>
+
 </body>
 </html>
