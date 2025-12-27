@@ -39,7 +39,7 @@
     <a-scene vr-mode-ui="enabled: false">
         <a-entity camera look-controls position="0 1.6 0"></a-entity>
 
-        <a-entity id="arrow-path" position="0 -1.0 0" data-height="50cm"></a-entity>
+        <a-entity id="arrow-path" position="0 -1.0 0"></a-entity>
     </a-scene>
 
     <script>
@@ -49,7 +49,7 @@
             .then(s => { v.srcObject = s; })
             .catch(e => { alert("Kamera xatosi: " + e); });
 
-        // 2. STRELKALAR ARRAYINI YASASH (KUBSIZ) - Balandlik 0.5m
+        // 2. STRELKALAR ARRAYINI YASASH (KUBSIZ) - Balandlik -1.0m (Pastda)
         const pathGroup = document.getElementById('arrow-path');
 
         for (let i = 1; i <= 5; i++) {
