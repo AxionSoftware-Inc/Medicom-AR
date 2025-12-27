@@ -1,32 +1,45 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>AR Faqat Strelkalar</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
         #ui {
-            position: fixed; top: 15px; width: 100%; text-align: center;
-            z-index: 10; color: white; font-family: sans-serif;
+            position: fixed;
+            top: 15px;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+            color: white;
+            font-family: sans-serif;
         }
     </style>
 </head>
+
 <body>
 
     <div id="ui">
-        <div style="background: rgba(0,255,100,0.4); padding: 10px; border-radius: 10px; display: inline-block; border: 1px solid #00ff66;">
+        <div
+            style="background: rgba(0,255,100,0.4); padding: 10px; border-radius: 10px; display: inline-block; border: 1px solid #00ff66;">
             <b>Navigatsiya:</b> Chapga buriling! ⬅️ <br>
             <small>(Agar hali ham kub ko'rinsa, sahifani yangilang)</small>
         </div>
     </div>
 
-    <video id="v" autoplay playsinline muted style="position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1;"></video>
+    <video id="v" autoplay playsinline muted
+        style="position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1;"></video>
 
     <a-scene vr-mode-ui="enabled: false">
         <a-entity camera look-controls position="0 1.6 0"></a-entity>
 
-        <a-entity id="arrow-path" position="0 0.5 0"></a-entity>
+        <a-entity id="arrow-path" position="0 0.5 0" data-height="50cm"></a-entity>
     </a-scene>
 
     <script>
@@ -36,24 +49,25 @@
             .then(s => { v.srcObject = s; })
             .catch(e => { alert("Kamera xatosi: " + e); });
 
-        // 2. STRELKALAR ARRAYINI YASASH (KUBSIZ)
+        // 2. STRELKALAR ARRAYINI YASASH (KUBSIZ) - Balandlik 0.5m
         const pathGroup = document.getElementById('arrow-path');
-        
+
         for (let i = 1; i <= 5; i++) {
             const arrow = document.createElement('a-entity');
-            
+
             // X o'qi bo'yicha har 1 metrda chapga ketadi (-1, -2, -3...)
             arrow.setAttribute('position', `${-i} 0 0`);
-            
+
             // Konus (Strelka uchi) va matn
             arrow.innerHTML = `
                 <a-cone radius-bottom="0.1" radius-top="0" height="0.4" color="#00ff66" rotation="0 0 90"></a-cone>
                 <a-text value="${i}m" position="0 0.4 0" align="center" scale="2 2 2" color="white"></a-text>
             `;
-            
+
             pathGroup.appendChild(arrow);
         }
         console.log("Strelkalar yuklandi, kub o'chirildi.");
     </script>
 </body>
+
 </html>
