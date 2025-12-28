@@ -1,7 +1,6 @@
 // --- SOZLAMALAR ---
 const CURRENT_QR_FLOOR = 1; // QR kod turgan qavat (O'zgartirishingiz mumkin)
 
-// Xonalar bazasi (JSON)
 // Xonalar bazasi (JSON orqali yuklanadi)
 let roomsData = [];
 
