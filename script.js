@@ -99,33 +99,49 @@ function drawPath(side, distance, roomName) {
     const root = document.getElementById('world-root');
     root.innerHTML = ''; // Eskij chizmalarni tozalash
 
+    // Sozlamalar
+    const step = 0.2; // Har 20smdan bitta konus
+    const startOffset = 1.5; // Telefondan 1.5 metr uzoqlikdan boshlanadi
+    // Agar masofa 30 metr bo'lsa, konuslar soni shunga qarab ko'payadi.
+    // Lekin siz "30ta konus" degansiz. Biz masofaga qarab moslashtiramiz.
+    const numSteps = Math.floor(distance / step);
+
     // Strelkalar zanjiri
-    for (let i = 2; i <= distance; i++) {
+    for (let i = 0; i < numSteps; i++) {
         const arrow = document.createElement('a-entity');
 
-        // Koordinatalar: Side (X), Height (Y), Forward (Z)
-        // Chap (-X), O'ng (+X). Oldinga har doim -Z (chunki ARda -Z bu old tomon)
-        // Bu yerda biz oddiy chiziq emas, "Egilib borish" effektini beramiz
-        // Lekin sizning talabingiz bo'yicha oddiy versiya:
+        let currentDist = startOffset + (i * step); // 1.5, 1.7, 1.9 ...
 
-        let posX = (side === 'left') ? -i : i;
+        // Koordinatalar: Side (X), Height (Y), Forward (Z)
+        // Chap (-X), O'ng (+X). 
+        // Z har doim 0 bo'ladi, shunda chapga qaraganingizda to'g'ri markazda turadi.
+
+        let posX = (side === 'left') ? -currentDist : currentDist;
         let rotZ = (side === 'left') ? 90 : -90;
 
-        // Eslatma: Bu "Static" yo'l. Foydalanuvchi yursa ham strelka qimirlamaydi (faqat buriladi).
-        arrow.setAttribute('position', `${posX} 0 -2`); // Sal oldinroqda turadi
+        arrow.setAttribute('position', `${posX} 0 0`);
         arrow.setAttribute('rotation', `0 0 ${rotZ}`);
 
+        // Matnni har 1 metrda (har 5-konusda) chiqarish
+        let textEntity = '';
+        if (i % 5 === 0) {
+            let distLabel = Math.floor(currentDist) + 'm';
+            textEntity = `<a-text value="${distLabel}" position="0 0.5 0" rotation="0 0 ${-rotZ}" align="center" scale="2 2 2" color="white"></a-text>`;
+        }
+
         arrow.innerHTML = `
-            <a-cone radius-bottom="0.1" height="0.4" color="#00ff66"></a-cone>
-            <a-text value="${i}m" position="0 0.5 0" rotation="0 0 ${-rotZ}" align="center" scale="2 2 2" color="white"></a-text>
+            <a-cone radius-bottom="0.08" height="0.3" color="#00ff66"></a-cone>
+            ${textEntity}
         `;
         root.appendChild(arrow);
     }
 
     // Manzil
     const goal = document.createElement('a-entity');
-    let goalX = (side === 'left') ? -(distance + 1) : (distance + 1);
-    goal.setAttribute('position', `${goalX} 0.5 -2`);
+    let goalDist = startOffset + distance;
+    let goalX = (side === 'left') ? -goalDist : goalDist;
+
+    goal.setAttribute('position', `${goalX} 0.5 0`);
     goal.innerHTML = `
         <a-sphere radius="0.4" color="yellow" animation="property: scale; to: 1.2 1.2 1.2; dir: alternate; loop: true"></a-sphere>
         <a-text value="${roomName}" position="0 1 0" align="center" scale="4 4 4" color="yellow" side="double"></a-text>
