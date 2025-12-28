@@ -1,0 +1,23 @@
+[
+    {
+        "id": 201,
+        "name": "201-Xona (Terapevt)",
+        "floor": 2,
+        "side": "left",
+        "distance": 6
+    },
+    {
+        "id": 202,
+        "name": "202-Xona (LOR)",
+        "floor": 2,
+        "side": "left",
+        "distance": 9
+    },
+    {
+        "id": 203,
+        "name": "Bosh Shifokor",
+        "floor": 2,
+        "side": "right",
+        "distance": 12
+    }
+]

@@ -1,5 +1,7 @@
 // --- SOZLAMALAR ---
-const CURRENT_QR_FLOOR = 1; // QR kod turgan qavat (O'zgartirishingiz mumkin)
+// --- SOZLAMALAR ---
+let CURRENT_QR_FLOOR = 1; // Default
+const TOTAL_FLOORS = 5; // Jami qavatlar soni
 
 // Xonalar bazasi (JSON orqali yuklanadi)
 let roomsData = [];
@@ -8,9 +10,22 @@ let initialHeading = null; // Qulflangan kompas yo'nalishi
 
 // 1. Tizimni ishga tushirish (Scan & Start)
 async function initSystem() {
-    // 0. JSON ma'lumotlarni yuklash
+    // 0. URL dan qavatni olish (masalan, ?floor=2)
+    const urlParams = new URLSearchParams(window.location.search);
+    const floorParam = parseInt(urlParams.get('floor'));
+
+    if (floorParam && floorParam > 0 && floorParam <= TOTAL_FLOORS) {
+        CURRENT_QR_FLOOR = floorParam;
+    }
+
+    // A. JSON ma'lumotlarni yuklash (floor1.json, floor2.json, ...)
     try {
-        const response = await fetch('floor1.json');
+        const fileName = `floor${CURRENT_QR_FLOOR}.json`;
+        console.log("Yuklanmoqda:", fileName);
+
+        const response = await fetch(fileName);
+        if (!response.ok) throw new Error("Fayl topilmadi");
+
         roomsData = await response.json();
     } catch (error) {
         console.error("JSON yuklashda xatolik:", error);

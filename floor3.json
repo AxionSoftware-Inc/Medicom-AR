@@ -1,0 +1,16 @@
+[
+    {
+        "id": 301,
+        "name": "301-Xona (Jarrohlik)",
+        "floor": 3,
+        "side": "left",
+        "distance": 7
+    },
+    {
+        "id": 302,
+        "name": "302-Xona (Reanimatsiya)",
+        "floor": 3,
+        "side": "right",
+        "distance": 10
+    }
+]

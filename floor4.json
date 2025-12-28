@@ -1,0 +1,16 @@
+[
+    {
+        "id": 401,
+        "name": "401-Xona (Palata)",
+        "floor": 4,
+        "side": "left",
+        "distance": 14
+    },
+    {
+        "id": 402,
+        "name": "402-Xona (Palata)",
+        "floor": 4,
+        "side": "right",
+        "distance": 14
+    }
+]
