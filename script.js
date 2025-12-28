@@ -123,49 +123,44 @@ function showTurnIndicator(side) {
 }
 
 // 4. AR Chizish (Qayta tanlaganda eskisi o'chib yangisi chiziladi)
-// 4. AR Chizish (Qayta tanlaganda eskisi o'chib yangisi chiziladi)
 function drawPath(side, distance, roomName) {
     const root = document.getElementById('world-root');
     root.innerHTML = ''; // Eskij chizmalarni tozalash
 
-    // Sozlamalar
-    const step = 0.5; // Har 50smdan bitta arrow (konuslar zich edi, arrowlar kattaroq bo'lishi mumkin)
-    const startOffset = 1.5; // Telefondan 1.5 metr uzoqlikdan boshlanadi
-    const numSteps = Math.floor(distance / step);
+    // Sozlamalar: 
+    // step = 0.3 (zichroq)
+    // masofani sun'iy ravishda oshiramiz (+3m)
+    const step = 0.3;
+    const startOffset = 1.0;
+    const drawDistance = distance + 3;
+    const numSteps = Math.floor(drawDistance / step);
 
     // Strelkalar zanjiri
     for (let i = 0; i < numSteps; i++) {
         const arrow = document.createElement('a-entity');
 
         let currentDist = startOffset + (i * step);
-
-        // Koordinatalar: Side (X), Height (Y), Forward (Z)
         let posX = (side === 'left') ? -currentDist : currentDist;
         let rotZ = (side === 'left') ? 90 : -90;
 
-        // "Yerga yopishib tursin" -> Y = 0.05
-        arrow.setAttribute('position', `${posX} 0.05 0`);
-
-        // Rotation: X=-90 (yerda yotish), Z=rotZ (burilish)
+        // Y = 0.01 (yerga yaqinroq)
+        arrow.setAttribute('position', `${posX} 0.01 0`);
         arrow.setAttribute('rotation', `-90 0 ${rotZ}`);
 
-        // Animatsiya (Yonib o'chish)
-        // Ko'k rang #00d2ff
-        // Triangle ishlatamiz
+        // Kichikroq va orasi ochilgan uchburchaklar
+        // Uzunlik 0.2m, step 0.3m -> orasida 0.1m joy qoladi
         arrow.innerHTML = `
             <a-triangle 
-                vertex-a="0 0.5 0" 
-                vertex-b="-0.25 -0.25 0" 
-                vertex-c="0.25 -0.25 0" 
+                vertex-a="0 0.1 0" 
+                vertex-b="-0.08 -0.1 0" 
+                vertex-c="0.08 -0.1 0" 
                 color="#00d2ff" 
                 material="opacity: 0.8; side: double"
-                animation="property: material.opacity; from: 1; to: 0.2; dur: 800; dir: alternate; loop: true">
+                animation="property: material.opacity; from: 1; to: 0.2; dur: 800; dir: alternate; loop: true; delay: ${i * 30}">
             </a-triangle>
         `;
         root.appendChild(arrow);
     }
-
-    // Manzil shari olib tashlandi (Foydalanuvchi talabi: "oxirida hechnima kerakmas")
 }
 
 // 5. Menyuni ochib-yopish (Header bosilganda)
