@@ -86,67 +86,86 @@ function selectRoom(room) {
     document.getElementById('current-target').innerText = "Borilmoqda: " + room.name;
     document.getElementById('toggle-icon').innerText = "▲";
 
-    // C) HUD (Pastdagi yozuv) ni yangilash
+    // C) UI elementlarni yangilash
     document.getElementById('hud-info').style.display = 'block';
     document.getElementById('target-name').innerText = room.name;
+
+    // Turn Indicator (2D) ni ko'rsatish
+    showTurnIndicator(room.side);
 
     // D) AR Yo'lni chizish
     drawPath(room.side, room.distance, room.name);
 }
 
+// Yangi funksiya: 2D Burilish ko'rsatkichi
+function showTurnIndicator(side) {
+    const indicator = document.getElementById('turn-indicator');
+    const arrow = document.getElementById('turn-arrow');
+    const text = document.getElementById('turn-text');
+
+    indicator.style.display = 'block';
+
+    if (side === 'left') {
+        arrow.style.transform = "scaleX(-1)"; // Chapga o'girish
+        arrow.style.animation = "blinkMoveLeft 1.5s infinite";
+        text.innerText = "Chapga buriling";
+    } else {
+        arrow.style.transform = "scaleX(1)"; // O'ngga (default)
+        arrow.style.animation = "blinkMove 1.5s infinite";
+        text.innerText = "O'ngga buriling";
+    }
+
+    // 5 sekunddan keyin o'chirish
+    setTimeout(() => {
+        indicator.style.display = 'none';
+        // Qayta ko'rinish beradigan bo'lsa animatsiya buzilmasligi uchun tozalash shart emas, chunki style override bo'ladi
+    }, 5000); // 5 sekund turadi
+}
+
+// 4. AR Chizish (Qayta tanlaganda eskisi o'chib yangisi chiziladi)
 // 4. AR Chizish (Qayta tanlaganda eskisi o'chib yangisi chiziladi)
 function drawPath(side, distance, roomName) {
     const root = document.getElementById('world-root');
     root.innerHTML = ''; // Eskij chizmalarni tozalash
 
     // Sozlamalar
-    const step = 0.2; // Har 20smdan bitta konus
+    const step = 0.5; // Har 50smdan bitta arrow (konuslar zich edi, arrowlar kattaroq bo'lishi mumkin)
     const startOffset = 1.5; // Telefondan 1.5 metr uzoqlikdan boshlanadi
-    // Agar masofa 30 metr bo'lsa, konuslar soni shunga qarab ko'payadi.
-    // Lekin siz "30ta konus" degansiz. Biz masofaga qarab moslashtiramiz.
     const numSteps = Math.floor(distance / step);
 
     // Strelkalar zanjiri
     for (let i = 0; i < numSteps; i++) {
         const arrow = document.createElement('a-entity');
 
-        let currentDist = startOffset + (i * step); // 1.5, 1.7, 1.9 ...
+        let currentDist = startOffset + (i * step);
 
         // Koordinatalar: Side (X), Height (Y), Forward (Z)
-        // Chap (-X), O'ng (+X). 
-        // Z har doim 0 bo'ladi, shunda chapga qaraganingizda to'g'ri markazda turadi.
-
         let posX = (side === 'left') ? -currentDist : currentDist;
         let rotZ = (side === 'left') ? 90 : -90;
 
-        arrow.setAttribute('position', `${posX} 0 0`);
-        arrow.setAttribute('rotation', `0 0 ${rotZ}`);
+        // "Yerga yopishib tursin" -> Y = 0.05
+        arrow.setAttribute('position', `${posX} 0.05 0`);
 
-        // Matnni har 1 metrda (har 5-konusda) chiqarish
-        let textEntity = '';
-        if (i % 5 === 0) {
-            let distLabel = Math.floor(currentDist) + 'm';
-            textEntity = `<a-text value="${distLabel}" position="0 0.5 0" rotation="0 0 ${-rotZ}" align="center" scale="2 2 2" color="white"></a-text>`;
-        }
+        // Rotation: X=-90 (yerda yotish), Z=rotZ (burilish)
+        arrow.setAttribute('rotation', `-90 0 ${rotZ}`);
 
+        // Animatsiya (Yonib o'chish)
+        // Ko'k rang #00d2ff
+        // Triangle ishlatamiz
         arrow.innerHTML = `
-            <a-cone radius-bottom="0.08" height="0.3" color="#00ff66"></a-cone>
-            ${textEntity}
+            <a-triangle 
+                vertex-a="0 0.5 0" 
+                vertex-b="-0.25 -0.25 0" 
+                vertex-c="0.25 -0.25 0" 
+                color="#00d2ff" 
+                material="opacity: 0.8; side: double"
+                animation="property: material.opacity; from: 1; to: 0.2; dur: 800; dir: alternate; loop: true">
+            </a-triangle>
         `;
         root.appendChild(arrow);
     }
 
-    // Manzil
-    const goal = document.createElement('a-entity');
-    let goalDist = startOffset + distance;
-    let goalX = (side === 'left') ? -goalDist : goalDist;
-
-    goal.setAttribute('position', `${goalX} 0.5 0`);
-    goal.innerHTML = `
-        <a-sphere radius="0.4" color="yellow" animation="property: scale; to: 1.2 1.2 1.2; dir: alternate; loop: true"></a-sphere>
-        <a-text value="${roomName}" position="0 1 0" align="center" scale="4 4 4" color="yellow" side="double"></a-text>
-    `;
-    root.appendChild(goal);
+    // Manzil shari olib tashlandi (Foydalanuvchi talabi: "oxirida hechnima kerakmas")
 }
 
 // 5. Menyuni ochib-yopish (Header bosilganda)
