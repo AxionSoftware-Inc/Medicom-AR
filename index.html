@@ -5,147 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Medicom AR Navigator</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
-        
-        /* 1. START SCREEN (Ruxsat olish uchun) */
-        #start-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: white; text-align: center; padding: 20px; box-sizing: border-box;
-        }
-
-        /* 2. ROOM SELECTION (2x2 Grid) */
-        #menu-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 9998; display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-        }
-
-        .grid-container {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%;
-        }
-
-        .room-btn {
-            background: rgba(255, 255, 255, 0.1); border: 2px solid #fff;
-            color: white; padding: 30px 10px; border-radius: 15px;
-            font-size: 18px; font-weight: bold; cursor: pointer;
-            backdrop-filter: blur(5px); transition: 0.3s;
-        }
-
-        .room-btn:active { background: #fff; color: #000; }
-
-        /* 3. HUD (Navigatsiya paytida yozuv) */
-        #hud {
-            position: fixed; top: 20px; width: 100%; text-align: center;
-            z-index: 1000; display: none; color: white;
-        }
-
-        .status-badge {
-            background: rgba(0, 122, 255, 0.8); padding: 10px 20px;
-            border-radius: 30px; font-weight: bold; font-size: 18px;
-        }
-
-        #bg-video {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: -1;
-        }
-
-        .btn-main {
-            background: #fff; color: #b21f1f; border: none; padding: 15px 40px;
-            font-size: 20px; font-weight: bold; border-radius: 30px; cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <video id="bg-video" autoplay playsinline muted></video>
 
     <div id="start-screen">
-        <h2>Medicom AR Nav</h2>
-        <p>Telefonni QR-kodga to'g'ri qaratib ushlang va tugmani bosing</p>
-        <button class="btn-main" onclick="initNavigation()">BOSHLASH 🚀</button>
+        <h1>Medicom AR</h1>
+        <p>Telefonni to'g'ri ushlab, QR kod qarshisida turing</p>
+        <button class="btn-main" onclick="initSystem()">SCAN & START 🚀</button>
     </div>
 
-    <div id="menu-screen">
-        <h2 style="color: white; margin-bottom: 20px;">Xonani tanlang</h2>
-        <div class="grid-container">
-            <button class="room-btn" onclick="startPath('left', '1-Xona')">1-Xona<br><small>Chapda</small></button>
-            <button class="room-btn" onclick="startPath('left', '2-Xona')">2-Xona<br><small>Chapda</small></button>
-            <button class="room-btn" onclick="startPath('right', '3-Xona')">3-Xona<br><small>O'ngda</small></button>
-            <button class="room-btn" onclick="startPath('right', '4-Xona')">4-Xona<br><small>O'ngda</small></button>
+    <div id="ui-layer" style="display: none;">
+        
+        <div id="rooms-menu" class="menu-expanded">
+            <div class="menu-header" onclick="toggleMenu()">
+                <span id="current-target">Xonani tanlang</span>
+                <span id="toggle-icon">▼</span>
+            </div>
+            <div id="rooms-list" class="grid-container">
+                </div>
         </div>
-    </div>
 
-    <div id="hud">
-        <div class="status-badge" id="hud-text">Manzilni tanlang</div>
+        <div id="hud-info" style="display: none;">
+            <div class="hud-box">
+                <span id="target-name">...</span> ga borilmoqda
+            </div>
+        </div>
+
     </div>
 
     <a-scene vr-mode-ui="enabled: false">
-        <a-entity camera look-controls position="0 1.6 0"></a-entity>
-        
-        <a-entity id="world-root" position="0 0.6 0"></a-entity>
+        <a-entity id="rig" position="0 0 0">
+            <a-camera id="cam" look-controls="enabled: true;"></a-camera>
+        </a-entity>
+        <a-entity id="world-root" position="0 0.5 0"></a-entity>
     </a-scene>
 
-    <script>
-        let initialHeading = 0;
-        let isHeadingLocked = false;
-
-        // 1. Dasturni ishga tushirish va yo'nalishni qulflash
-        async function initNavigation() {
-            // Aniq shu soniyada orientatsiyani qulflashga urinish
-            window.addEventListener('deviceorientation', captureInitialHeading, {once: true});
-
-            // Kamera va Sensor ruxsatlari
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                document.getElementById('bg-video').srcObject = stream;
-                
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    await DeviceOrientationEvent.requestPermission();
-                }
-
-                document.getElementById('start-screen').style.display = 'none';
-                document.getElementById('menu-screen').style.display = 'flex';
-            } catch (e) {
-                alert("Kamera yoki datchik ruxsati berilmadi!");
-            }
-        }
-
-        function captureInitialHeading(event) {
-            // QR skaner qilinganda telefon qaysi tomonga qarab turgan bo'lsa, o'sha "to'g'ri" (0 nuqta)
-            initialHeading = event.webkitCompassHeading || event.alpha;
-            console.log("Anchor locked at: " + initialHeading);
-        }
-
-        // 2. Yo'lni chizish (Chap yoki O'ng)
-        function startPath(side, roomName) {
-            document.getElementById('menu-screen').style.display = 'none';
-            document.getElementById('hud').style.display = 'block';
-            document.getElementById('hud-text').innerText = roomName + " sari...";
-
-            const root = document.getElementById('world-root');
-            root.innerHTML = ''; // Eski strelkalarni o'chirish
-
-            // Strelkalar arrayi (5 metrga)
-            for (let i = 2; i <= 6; i++) {
-                const arrow = document.createElement('a-entity');
-                
-                // Koordinata mantiqi:
-                // side === 'left'  => X manfiy (-i)
-                // side === 'right' => X musbat (+i)
-                let posX = (side === 'left') ? -i : i;
-                let rotZ = (side === 'left') ? 90 : -90;
-
-                arrow.setAttribute('position', `${posX} 0 -1`); // -1 biroz oldinda bo'lishi uchun
-                arrow.innerHTML = `
-                    <a-cone radius-bottom="0.1" height="0.4" color="#00ff66" rotation="0 0 ${rotZ}"></a-cone>
-                    <a-text value="${i-1}m" position="0 0.4 0" align="center" scale="2 2 2" color="white"></a-text>
-                `;
-                root.appendChild(arrow);
-            }
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

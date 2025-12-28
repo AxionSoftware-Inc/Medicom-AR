@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "name": "101-Xona",
+    "floor": 1,
+    "side": "left",
+    "distance": 5
+  },
+  {
+    "id": 2,
+    "name": "102-Xona",
+    "floor": 1,
+    "side": "left",
+    "distance": 8
+  },
+  {
+    "id": 3,
+    "name": "Oshxona",
+    "floor": 1,
+    "side": "right",
+    "distance": 6
+  },
+  {
+    "id": 4,
+    "name": "204-Xona",
+    "floor": 2,
+    "side": "left",
+    "distance": 10
+  },
+  {
+    "id": 5,
+    "name": "Direktor",
+    "floor": 2,
+    "side": "right",
+    "distance": 12
+  },
+  {
+    "id": 6,
+    "name": "Laboratoriya",
+    "floor": 1,
+    "side": "right",
+    "distance": 15
+  }
+]
