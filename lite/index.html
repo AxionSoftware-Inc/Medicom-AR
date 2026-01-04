@@ -1,62 +1,116 @@
 <!DOCTYPE html>
 <html lang="uz">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lite Navigatsiya</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    
+
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
-        
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+            background: #000;
+        }
+
         /* VIDEO FON (Fake AR) */
         #bg-video {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: -1;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
         }
 
         /* UI */
         #ui-container {
-            position: fixed; inset: 0; z-index: 999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             pointer-events: none;
         }
-        #ui-container > * { pointer-events: auto; }
+
+        #ui-container>* {
+            pointer-events: auto;
+        }
 
         /* Start Ekrani (AR bilan bir xil) */
         #start-screen {
-            background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(10px);
-            padding: 30px; border-radius: 20px; text-align: center; color: white;
-            border: 1px solid rgba(255,255,255,0.2); width: 85%; max-width: 400px;
+            background: rgba(20, 20, 30, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 85%;
+            max-width: 400px;
         }
-        
+
         .btn-start {
-            background: #00d2ff; border: none; padding: 15px 40px;
-            font-size: 1.1rem; font-weight: bold; border-radius: 50px;
-            margin-top: 20px; cursor: pointer; width: 100%;
+            background: #00d2ff;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            margin-top: 20px;
+            cursor: pointer;
+            width: 100%;
         }
 
         /* Xonalar Ro'yxati */
         #room-list-container {
-            display: none; width: 90%; max-height: 60vh; overflow-y: auto;
-            background: rgba(10, 20, 30, 0.85); backdrop-filter: blur(10px);
-            border-radius: 15px; padding: 15px;
+            display: none;
+            width: 90%;
+            max-height: 60vh;
+            overflow-y: auto;
+            background: rgba(10, 20, 30, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
         }
-        
+
         .room-item {
-            background: rgba(255,255,255,0.1); padding: 15px; margin-bottom: 10px;
-            border-radius: 10px; color: white; cursor: pointer; border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            border: 1px solid transparent;
         }
-        .room-item:active { background: #00d2ff; color: #000; }
+
+        .room-item:active {
+            background: #00d2ff;
+            color: #000;
+        }
 
         /* Menyuga qaytish */
         #btn-reset {
-            display: none; position: fixed; bottom: 30px; left: 50%;
-            transform: translateX(-50%); background: red; color: white;
-            padding: 10px 20px; border: none; border-radius: 20px; z-index: 1000;
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: red;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            z-index: 1000;
         }
     </style>
 </head>
+
 <body>
 
     <video id="bg-video" autoplay playsinline muted></video>
@@ -69,7 +123,7 @@
                 QR kodga qarab turing va "Boshlash"ni bosing.
             </p>
             <button class="btn-start" id="start-btn">KAMERANI YOQISH</button>
-            
+
             <a href="../ar/index.html" style="display:block; margin-top:15px; color:#aaa; font-size:0.8rem;">
                 6DoF (Pro) versiyaga o'tish
             </a>
@@ -81,6 +135,11 @@
         </div>
     </div>
 
+    <div id="nav-hint-box"
+        style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 20px; border-radius:15px; text-align:center; color:white; border:1px solid rgba(255,255,255,0.2); z-index:1000;">
+        <span id="nav-hint-text" style="font-weight:bold; font-size:1.1rem; color:#ffd700"></span>
+    </div>
+
     <button id="btn-reset" onclick="resetApp()">Menyuga qaytish</button>
 
     <a-scene vr-mode-ui="enabled: false">
@@ -90,4 +149,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

@@ -222,7 +222,8 @@
         floorTitle.innerText = `${currentFloor}-qavat ma'lumotlari...`;
 
         // 1. JSON YUKLASH
-        fetch('floors.json')
+        // 1. JSON YUKLASH
+        fetch('../floors.json')
             .then(res => res.json())
             .then(data => {
                 const rooms = data[currentFloor];
@@ -231,14 +232,16 @@
                     rooms.forEach(room => {
                         const div = document.createElement('div');
                         div.className = 'room-item';
-                        // Iconka tomoniga qarab
-                        const icon = room.side === 'left' ? '⬅️' : '➡️';
+                        // Icon based on corridor direction
+                        const directionIcon = room.corridor === 'left' ? '⬅️' : '➡️';
+                        const directionText = room.corridor === 'left' ? 'Chap yo\'lak' : 'O\'ng yo\'lak';
+
                         div.innerHTML = `
                             <div style="text-align:left">
-                                <div style="font-weight:600; font-size:1.1rem">${room.title}</div>
-                                <div style="font-size:0.8rem; color:#ccc; margin-top:4px">${room.desc || ''}</div>
+                                <div style="font-weight:600; font-size:1.1rem">Xona ${room.id}</div>
+                                <div style="font-size:0.8rem; color:#ccc; margin-top:4px">${directionText}, ${room.x}m</div>
                             </div>
-                            <div style="font-size:1.4rem">${icon}</div>
+                            <div style="font-size:1.4rem">${directionIcon}</div>
                         `;
                         div.onclick = (e) => {
                             e.stopPropagation();
@@ -252,7 +255,7 @@
             })
             .catch(err => {
                 console.error(err);
-                floorTitle.innerText = "Internet xatosi!";
+                floorTitle.innerText = "Internet xatosi yoki fayl topilmadi!";
             });
 
         // 2. AR BOSHLASH
@@ -307,11 +310,13 @@
 
             let doorZ = 0;
             if (isLeftCorridor) {
-                // Chap koridorda: Door Left -> -Z, Door Right -> +Z
-                doorZ = room.door === 'left' ? -1.5 : 1.5;
-            } else {
-                // O'ng koridorda: Door Left -> +Z, Door Right -> -Z
+                // Chap koridorda (-X ga yuryapmiz)
+                // Right -> -Z, Left -> +Z
                 doorZ = room.door === 'left' ? 1.5 : -1.5;
+            } else {
+                // O'ng koridorda (+X ga yuryapmiz)
+                // Right -> +Z, Left -> -Z
+                doorZ = room.door === 'left' ? -1.5 : 1.5;
             }
 
             // A. START ARROW (Sariq, Koridorga qarab)
