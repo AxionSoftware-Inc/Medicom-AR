@@ -5,19 +5,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AR Navigatsiya (Pro)</title>
-    
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
 
     <style>
-        /* --- ASOSIY UI STYLES --- */
+        /* --- UI DIZAYN (O'zgarishsiz) --- */
         body {
             margin: 0;
             background: #000;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
         }
 
-        /* UI Konteyner (Tugmalar bosilishi uchun pointer-events sozlanadi) */
         #ui-container {
             position: fixed;
             inset: 0;
@@ -28,159 +27,108 @@
             justify-content: center;
             pointer-events: none;
         }
-        #ui-container > * {
+
+        #ui-container>* {
             pointer-events: auto;
         }
 
-        /* --- START EKRANI --- */
+        /* Start Ekrani */
         #start-screen {
-            background: rgba(15, 23, 35, 0.95);
+            background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             padding: 30px;
             border-radius: 24px;
             text-align: center;
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            width: 85%;
+            max-width: 360px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
         }
 
-        h1 {
-            margin: 0;
-            font-size: 1.6rem;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, #fff, #ccc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* --- VIZIR (QR RAMKA) --- */
-        .qr-frame {
-            width: 220px;
-            height: 220px;
-            border: 2px solid rgba(0, 210, 255, 0.6);
-            border-radius: 20px;
-            margin: 25px 0;
-            position: relative;
-            background: rgba(0, 210, 255, 0.03);
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* O'rtadagi Plyus (+) belgisi */
-        .qr-frame::after {
-            content: '+';
-            font-size: 50px;
-            color: rgba(0, 210, 255, 0.4);
-            font-weight: 100;
-        }
-
-        /* Burchak bezaklari (Corner borders) */
-        .qr-corner {
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            border-color: #fff;
-            border-style: solid;
-            filter: drop-shadow(0 0 5px rgba(0,210,255,0.8));
-        }
-        .tl { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-radius: 12px 0 0 0; }
-        .tr { top: -2px; right: -2px; border-width: 4px 4px 0 0; border-radius: 0 12px 0 0; }
-        .bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; border-radius: 0 0 0 12px; }
-        .br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; border-radius: 0 0 12px 0; }
-
-        /* BOSHLASH TUGMASI */
         .btn-start {
             background: linear-gradient(135deg, #00d2ff, #3a7bd5);
             border: none;
-            padding: 18px 0;
+            padding: 16px 0;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            border-radius: 50px;
+            border-radius: 16px;
+            margin-top: 25px;
             cursor: pointer;
             width: 100%;
-            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
             transition: transform 0.1s;
         }
+
         .btn-start:active {
-            transform: scale(0.97);
+            transform: scale(0.98);
         }
 
-        /* --- RO'YXAT EKRANI --- */
+        /* Ro'yxat */
         #room-list {
             display: none;
             width: 90%;
-            max-height: 65vh;
+            max-height: 60vh;
             overflow-y: auto;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(15px);
             border-radius: 20px;
             padding: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .room-item {
             background: rgba(255, 255, 255, 0.05);
-            padding: 18px;
-            margin-bottom: 12px;
-            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 14px;
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: background 0.2s;
             border: 1px solid transparent;
-        }
-        .room-item:hover {
-            border-color: rgba(0,210,255,0.3);
-        }
-        .room-item:active {
-            background: rgba(0, 210, 255, 0.2);
+            transition: background 0.2s;
         }
 
-        /* --- HUD (Navigatsiya jarayoni) --- */
+        .room-item:active {
+            background: rgba(0, 210, 255, 0.2);
+            border-color: #00d2ff;
+        }
+
+        /* HUD & Hints */
         #hud {
             display: none;
             position: fixed;
-            top: 40px;
+            top: 30px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
-            padding: 10px 30px;
-            border-radius: 50px;
+            padding: 8px 20px;
+            border-radius: 30px;
             color: #00ff9d;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
             pointer-events: none;
-            z-index: 1000;
         }
 
         #nav-hint-box {
             display: none;
             position: fixed;
-            bottom: 50px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            padding: 15px 30px;
-            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px 24px;
+            border-radius: 16px;
             text-align: center;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            max-width: 85%;
-            z-index: 1000;
-            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 80%;
         }
 
         #btn-close {
@@ -188,15 +136,17 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(255, 0, 0, 0.8);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
             color: white;
             border: none;
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
+            font-weight: bold;
             cursor: pointer;
-            z-index: 1001;
+            z-index: 1000;
             align-items: center;
             justify-content: center;
         }
@@ -209,46 +159,44 @@
         <button id="btn-close" onclick="resetApp()">✕</button>
 
         <div id="start-screen">
-            <h1>AR NAVIGATSIYA</h1>
-            <p id="floor-title" style="color:#94a3b8; font-size: 0.95rem; margin: 8px 0;">Ma'lumotlar yuklanmoqda...</p>
-            
-            <div class="qr-frame">
-                <div class="qr-corner tl"></div>
-                <div class="qr-corner tr"></div>
-                <div class="qr-corner bl"></div>
-                <div class="qr-corner br"></div>
+            <h1 style="margin:0; font-size:1.6rem; letter-spacing: 1px;">AR NAVIGATSIYA</h1>
+            <p id="floor-title" style="color:#94a3b8; margin-top:8px; font-size: 0.9rem">Qavat aniqlanmoqda...</p>
+
+            <div
+                style="background: rgba(255, 215, 0, 0.15); border-radius: 12px; padding: 12px; margin-top: 20px; text-align: left;">
+                <p style="font-size:0.85rem; color:#ffd700; margin:0; line-height:1.4">
+                    🛑 <b>MUHIM:</b> "Boshlash"ni bosishdan oldin:
+                    <br>1. QR kod ro'parasida turing.
+                    <br>2. Telefonni <b>yo'lakka (yurish tomoniga)</b> qarating.
+                </p>
             </div>
 
-            <p style="font-size:0.95rem; color:#ffd700; margin:0 0 20px 0; line-height:1.5;">
-                Telefonni tekis tutib, QR kodni ramka ichiga to'g'rilang va tugmani bosing.
-            </p>
-
-            <button class="btn-start" id="start-btn">BOSHLASH 🚀</button>
+            <button class="btn-start" id="start-btn">BOSHLASH</button>
         </div>
 
         <div id="room-list"></div>
     </div>
 
     <div id="hud"><span id="dist-val">0.0</span> m</div>
-    <div id="nav-hint-box"><span id="nav-hint-text" style="font-weight: bold;"></span></div>
 
-    <a-scene 
-        webxr="requiredFeatures: local-floor, dom-overlay; overlayElement: #ui-container"
-        renderer="antialias: false; colorManagement: true; precision: medium;" 
-        vr-mode-ui="enabled: false">
+    <div id="nav-hint-box">
+        <span id="nav-hint-text" style="font-weight: bold;"></span>
+    </div>
 
-        <a-camera id="cam" position="0 1.6 0" look-controls="enabled: false"></a-camera>
-        
+    <a-scene webxr="requiredFeatures: local-floor, dom-overlay; overlayElement: #ui-container"
+        renderer="antialias: true; colorManagement: true;" vr-mode-ui="enabled: false">
+
+        <a-camera id="cam" position="0 1.6 0"></a-camera>
         <a-entity id="ar-world" position="0 0 0"></a-entity>
+
     </a-scene>
 
     <script>
         // --- SOZLAMALAR ---
-        const Z_OFFSET = -1.0; // Barcha chizmalarni 1 metr oldinga surish (orqada qolmasligi uchun)
         const urlParams = new URLSearchParams(window.location.search);
         const currentFloor = urlParams.get('floor') || "1";
 
-        // Elementlarni olish
+        // Elementlar
         const startScreen = document.getElementById('start-screen');
         const roomList = document.getElementById('room-list');
         const hud = document.getElementById('hud');
@@ -262,208 +210,208 @@
         let targetData = null;
         let isNavigating = false;
 
-        // 1. JSON YUKLASH (Asosiy papkadan ../floors.json)
-        fetch('../floors.json')
+        // 1. JSON YUKLASH
+        fetch('../floors.json?v=' + Date.now())
             .then(res => res.json())
             .then(data => {
                 const rooms = data[currentFloor];
                 if (rooms) {
-                    floorTitle.innerText = `${currentFloor}-qavat. Xonani tanlang:`;
+                    floorTitle.innerText = `${currentFloor}-qavat. Manzilni tanlang:`;
                     rooms.forEach(room => {
                         const div = document.createElement('div');
                         div.className = 'room-item';
-                        
-                        // Ikonka va Matn
-                        const icon = room.corridor === 'left' ? '⬅️' : '➡️';
-                        const corridorText = room.corridor === 'left' ? "Chap yo'lak" : "O'ng yo'lak";
-                        
+
+                        const isLeft = (room.corridor === 'left' || room.corridorDir === 'left');
+                        const dirIcon = isLeft ? '⬅️' : '➡️';
+                        const dirText = isLeft ? 'Chap yo\'lak' : 'O\'ng yo\'lak';
+
                         div.innerHTML = `
-                            <div>
+                            <div style="text-align:left">
                                 <div style="font-weight:600; font-size:1.1rem">Xona ${room.id}</div>
-                                <div style="font-size:0.85rem; color:#ccc; margin-top:4px;">${corridorText}, ${room.x}m</div>
+                                <div style="font-size:0.8rem; color:#ccc; margin-top:4px">${dirText}, ${room.x}m</div>
                             </div>
-                            <div style="font-size:1.5rem">${icon}</div>`;
-                        
-                        div.onclick = (e) => { 
-                            e.stopPropagation(); 
-                            startNavigation(room); 
-                        };
+                            <div style="font-size:1.4rem">${dirIcon}</div>
+                        `;
+                        div.onclick = (e) => { e.stopPropagation(); startNavigation(room); };
                         roomList.appendChild(div);
                     });
-                } else { 
-                    floorTitle.innerText = "Ma'lumot topilmadi"; 
+                } else {
+                    floorTitle.innerText = "Ma'lumot topilmadi";
                 }
             })
-            .catch(err => { 
-                console.error(err); 
-                floorTitle.innerText = "Baza xatosi!"; 
-            });
+            .catch(err => floorTitle.innerText = "Xatolik: Internet yo'q");
 
-        // 2. AR BOSHLASH (WebXR Enter)
+        // 2. AR BOSHLASH
         document.getElementById('start-btn').onclick = async () => {
             try {
                 const scene = document.querySelector('a-scene');
                 await scene.enterAR();
-                
-                // UI o'zgarishi
                 startScreen.style.display = 'none';
                 roomList.style.display = 'block';
-            } catch (e) { 
-                alert("Xatolik: " + e.message); 
-            }
+            } catch (e) { alert("Xatolik: " + e.message); }
         };
 
-        // 3. NAVIGATSIYANI BOSHLASH (Xona tanlanganda)
+        // 3. NAVIGATSIYA BOSHLASH
         function startNavigation(room) {
             targetData = room;
             isNavigating = true;
 
-            // UI ni almashtirish
+            // UI almashinuvi
             roomList.style.display = 'none';
             hud.style.display = 'block';
             navHintBox.style.display = 'block';
             btnClose.style.display = 'flex';
 
-            // Maslahat matni (Hint)
-            navHintText.innerText = room.corridor === 'left' ? "⬅️ CHAPGA BURILING" : "➡️ O'NGGA BURILING";
+            const isLeft = (room.corridor === 'left' || room.corridorDir === 'left');
+            navHintText.innerText = isLeft ? "CHAPGA BURILING" : "O'NGGA BURILING";
             navHintText.style.color = "#ffd700";
 
-            // Sahnani tozalash va yangi chizish
-            arWorld.innerHTML = ''; 
-            drawOptimizedPath(room);
+            arWorld.innerHTML = '';
+            drawProPath(room);
         }
 
-        // 4. CHIZMALAR (RUNNER MANTIG'I)
-        function drawOptimizedPath(room) {
+        // --- YANGILANGAN CHIZMA (Uchburchaklar va To'g'ri Finish) ---
+        function drawProPath(room) {
             const dist = room.x;
-            const isLeft = room.corridor === 'left';
-            const dir = isLeft ? -1 : 1; // Chap=-1, O'ng=1
+            const isLeft = (room.corridor === 'left' || room.corridorDir === 'left');
+            const dirX = isLeft ? -1 : 1;
 
-            // --- A. SARIQ START STRELKA (Static) ---
+            // 1. START BELGISI (Kamera ro'parasida)
+            // Konteyner yaratamiz: X bo'yicha 90 aylantirib, yuzini userga qaratamiz
+            const startGroup = document.createElement('a-entity');
+            startGroup.setAttribute('position', '0 1.5 -1');
+            startGroup.setAttribute('rotation', '90 0 0');
+
             const startArrow = document.createElement('a-entity');
-            const rotY = isLeft ? 90 : -90; // Chapga 90, O'ngga -90
+            startArrow.setAttribute('geometry', 'primitive: triangle; vertexA: 0 0 0; vertexB: -0.3 0 0.5; vertexC: 0.3 0 0.5');
+            startArrow.setAttribute('material', 'color: #00ff00; shader: flat; transparent: true; opacity: 0.9; side: double');
 
-            startArrow.setAttribute('geometry', 'primitive: cone; radiusBottom: 0.2; height: 0.8; segmentsRadial: 8');
-            startArrow.setAttribute('material', 'color: yellow; shader: flat');
-            // Z o'qi bo'yicha 90 gradus yotqizamiz (Yonboshga qarashi uchun)
-            startArrow.setAttribute('rotation', `0 0 ${rotY}`); 
-            startArrow.setAttribute('position', `0 1.5 ${Z_OFFSET}`); // Ko'z oldida
-            
-            // Animatsiya (Bounce)
-            startArrow.setAttribute('animation', `property: position; to: 0 1.7 ${Z_OFFSET}; dir: alternate; loop: true; dur: 800`);
-            
-            // 4 sekunddan keyin o'chiramiz (Xalaqit bermasligi uchun)
-            setTimeout(() => { 
-                if(startArrow.parentNode) startArrow.parentNode.removeChild(startArrow); 
-            }, 4000);
-            arWorld.appendChild(startArrow);
+            // Ichki Y aylantirish orqali yo'nalish beramiz
+            // Agar corridor 'left' bo'lsa 90 (Chapga), 'right' bo'lsa -90 (O'ngga)
+            const startRot = isLeft ? 90 : -90;
+            startArrow.setAttribute('rotation', `0 ${startRot} 0`);
 
+            // Animatsiya
+            startArrow.setAttribute('animation', 'property: scale; from: 1 1 1; to: 1.3 1.3 1.3; dir: alternate; loop: true; dur: 800');
 
-            // --- B. YUGURUVCHI STRELKA (Runner) - LAGSIZ ---
-            const runner = document.createElement('a-entity');
-            runner.setAttribute('geometry', 'primitive: box; width: 0.5; height: 0.05; depth: 0.3');
-            runner.setAttribute('material', 'color: #00d2ff; shader: flat; opacity: 0.9');
-            
-            const startX = 0.5 * dir;
-            const endX = dist * dir;
+            startGroup.appendChild(startArrow);
+            arWorld.appendChild(startGroup);
 
-            runner.setAttribute('position', `${startX} 0.1 ${Z_OFFSET}`);
-            runner.setAttribute('rotation', `0 ${rotY} 0`); // Yo'nalishga qarab
+            // 2. YO'LAK (Ko'k Uchburchaklar)
+            // Startdan biroz orqadan (-1m) boshlab chizamiz
+            for (let i = -1.0; i < dist; i += 1.2) {
+                // Start joyini (0.0) bo'sh qoldiramiz, chunki u yerda startArrow bor
+                if (Math.abs(i) < 0.5) continue;
 
-            // Yugurish Animatsiyasi
-            runner.setAttribute('animation', `property: position; from: ${startX} 0.1 ${Z_OFFSET}; to: ${endX} 0.1 ${Z_OFFSET}; loop: true; dur: 2000; easing: linear`);
-            
-            arWorld.appendChild(runner);
+                const tri = document.createElement('a-entity');
+                tri.setAttribute('geometry', 'primitive: triangle; vertexA: 0 0 0; vertexB: -0.25 0 0.4; vertexC: 0.25 0 0.4');
+                tri.setAttribute('material', 'color: #00d2ff; shader: flat; transparent: true; opacity: 0.8; side: double');
 
+                tri.setAttribute('position', `${i * dirX} 0.05 0`); // X o'qi bo'ylab, Z=0 (Markaz)
 
-            // --- C. POL CHIZIG'I (Floor Line) ---
-            const line = document.createElement('a-entity');
-            const midX = (dist * dir) / 2;
-            
-            line.setAttribute('geometry', `primitive: plane; width: ${dist}; height: 0.15`);
-            line.setAttribute('material', 'color: #00d2ff; opacity: 0.3; shader: flat; side: double');
-            line.setAttribute('rotation', '-90 0 0'); // Yerga yotqizish
-            line.setAttribute('position', `${midX} 0.02 ${Z_OFFSET}`);
-            arWorld.appendChild(line);
+                // Burilish: Yo'lak bo'ylab
+                tri.setAttribute('rotation', `0 ${isLeft ? 90 : -90} 0`);
 
-
-            // --- D. MANZIL (OQ STRELKA VA TEXT) ---
-            // Eshik qaysi tomonda?
-            let doorZ = Z_OFFSET; 
-            if (isLeft) {
-                // Chap koridorda: Right -> -Z, Left -> +Z
-                doorZ = room.door === 'left' ? (Z_OFFSET + 1.5) : (Z_OFFSET - 1.5);
-            } else {
-                // O'ng koridorda: Right -> +Z, Left -> -Z
-                doorZ = room.door === 'left' ? (Z_OFFSET - 1.5) : (Z_OFFSET + 1.5);
+                arWorld.appendChild(tri);
             }
 
+            // 3. FINISH (Eshikka qaragan Strelka)
             const destGroup = document.createElement('a-entity');
-            destGroup.setAttribute('position', `${endX} 1.5 ${doorZ}`);
-            
-            // Oq strelka pastga
-            const downArrow = document.createElement('a-entity');
-            downArrow.setAttribute('geometry', 'primitive: cone; radiusTop: 0.3; radiusBottom: 0; height: 0.6; segmentsRadial: 10');
-            downArrow.setAttribute('material', 'color: white; shader: flat');
-            downArrow.setAttribute('animation', 'property: position; from: 0 0 0; to: 0 -0.3 0; dir: alternate; loop: true; dur: 600');
-            
-            // Xona raqami (Siz aytgandek balandroqda: Y = 1.2)
+            destGroup.setAttribute('position', `${dist * dirX} 0.1 0`);
+
+            const finishArrow = document.createElement('a-entity');
+            // Katta uchburchak
+            finishArrow.setAttribute('geometry', 'primitive: triangle; vertexA: 0 0 -0.8; vertexB: -0.4 0 0.4; vertexC: 0.4 0 0.4');
+            finishArrow.setAttribute('material', 'color: #ffffff; shader: flat; side: double');
+
+            // Eshik tomonga burish
+            const isDoorLeft = (room.side === 'left' || room.door === 'left');
+            let finalRot = 0;
+
+            if (isLeft) { // Chap koridordamiz (-X)
+                // Default triangle uchi (vertexA) -Z ga qaraydi.
+                if (isDoorLeft) {
+                    // Eshik chapda (+Z). Strelka orqaga burilishi kerak -> 180
+                    finalRot = 180;
+                } else {
+                    // Eshik o'ngda (-Z). Strelka to'g'ri -> 0
+                    finalRot = 0;
+                }
+            } else { // O'ng koridordamiz (+X)
+                if (isDoorLeft) {
+                    // Eshik chapda (-Z). Strelka to'g'ri -> 0
+                    finalRot = 0;
+                } else {
+                    // Eshik o'ngda (+Z). Strelka orqaga -> 180
+                    finalRot = 180;
+                }
+            }
+
+            finishArrow.setAttribute('rotation', `0 ${finalRot} 90`);
+            finishArrow.setAttribute('animation', 'property: position; from: 0 0.1 0; to: 0 0.4 0; dir: alternate; loop: true; dur: 700');
+
+            // Xona raqami
             const text = document.createElement('a-text');
             text.setAttribute('value', room.id);
             text.setAttribute('align', 'center');
-            text.setAttribute('scale', '4 4 4'); // Katta shrift
-            text.setAttribute('color', 'white');
-            text.setAttribute('position', '0 1.2 0'); // Strelka ustida
-            // Matnni aylantirish (Siz kelayotgan tomonga qaratish)
-            text.setAttribute('rotation', `0 ${rotY} 0`);
+            text.setAttribute('scale', '5 5 5');
+            text.setAttribute('position', '0 1.5 0');
+            // Matnni userga qaratish
+            text.setAttribute('rotation', `0 ${isLeft ? 90 : -90} 0`);
 
-            destGroup.appendChild(downArrow);
+            destGroup.appendChild(finishArrow);
             destGroup.appendChild(text);
             arWorld.appendChild(destGroup);
         }
 
-        // 5. NAVIGATSIYA LOGIKASI (TICK)
+        // 5. NAVIGATSIYA LOOPS
         AFRAME.registerComponent('nav-logic', {
             tick: function () {
                 if (!isNavigating || !targetData) return;
 
                 const camPos = this.el.camera.el.object3D.position;
-                // Masofani X o'qi bo'yicha hisoblash
-                const targetX = targetData.x * (targetData.corridor === 'left' ? -1 : 1);
-                const currentDist = Math.abs(targetX - camPos.x);
+                const isLeft = (targetData.corridor === 'left' || targetData.corridorDir === 'left');
+                const targetX = targetData.x * (isLeft ? -1 : 1);
 
-                distVal.innerText = currentDist.toFixed(1);
+                const distRemaining = Math.abs(targetX - camPos.x);
+                distVal.innerText = distRemaining.toFixed(1);
 
-                // Start zonasidan (2m) uzoqlashganda "Buriling" yozuvini o'chirish
-                if (Math.abs(camPos.x) > 2.0 && navHintText.innerText.includes("BURILING")) {
-                    navHintText.innerText = "To'g'riga yuring ⬆️";
-                    navHintText.style.color = "white";
-                }
+                // Drift Detection (Z o'qi bo'yicha og'ish)
+                if (Math.abs(camPos.z) > 1.5) {
+                    navHintText.innerHTML = "⚠️ MARKAZGA QAYTING!<br><small>Devorga juda yaqinsiz</small>";
+                    navHintText.style.color = "#ff4444";
+                    navHintBox.style.borderColor = "#ff4444";
+                } else {
+                    navHintBox.style.borderColor = "rgba(255, 255, 255, 0.1)";
 
-                // Yetib kelganda (1.5m)
-                if (currentDist < 1.5) {
-                    navHintText.innerHTML = `
-                        <span style="color:#00ff00; font-size:1.2rem;">YETIB KELDINGIZ! 🏁</span>
-                        <br>
-                        <button onclick="resetApp()" style="margin-top:15px; padding:8px 30px; border-radius:50px; border:none; background:#00ff00; color:black; font-weight:bold; cursor:pointer;">Tugatish</button>
-                    `;
-                    btnClose.style.display = 'none'; // X tugmasini yashiramiz
+                    if (distRemaining > 1.5) {
+                        navHintText.innerText = "To'g'riga yuring ⬆️";
+                        navHintText.style.color = "#fff";
+                    }
+
+                    if (distRemaining < 1.0) {
+                        navHintText.innerHTML = `🏁 XONA SHU YERDA <br> <button onclick="resetApp()" style="margin-top:10px; padding:5px 15px; background:#00ff00; border:none; border-radius:10px;">Tugatish</button>`;
+                        navHintText.style.color = "#00ff00";
+                        btnClose.style.display = 'none';
+                    }
                 }
             }
         });
+
         document.querySelector('a-scene').setAttribute('nav-logic', '');
 
-        // 6. RESET (Menyuga qaytish)
+        // 6. RESET
         window.resetApp = function () {
             isNavigating = false;
             targetData = null;
-            arWorld.innerHTML = ''; // Sahnani tozalash
-
+            arWorld.innerHTML = '';
             hud.style.display = 'none';
             navHintBox.style.display = 'none';
             btnClose.style.display = 'none';
             roomList.style.display = 'block';
+            navHintBox.style.borderColor = "rgba(255, 255, 255, 0.1)";
         }
     </script>
 </body>
+
 </html>
