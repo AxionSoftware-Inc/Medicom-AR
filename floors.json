@@ -44,15 +44,14 @@
     { "id": "213", "x": 15, "side": "left", "width": 1.8, "corridorDir": "right" },
     { "id": "214", "x": 21, "side": "left", "width": 1.5, "corridorDir": "right" },
     { "id": "215", "x": 23, "side": "left", "width": 1.8, "corridorDir": "right" },
-    { "id": "Xojatxona", "x": 23, "side": "right", "width": 1.8, "corridorDir": "right" },
     { "id": "216", "x": 28, "side": "left", "width": 1.5, "corridorDir": "right" }
   ],
   "3": [
     { "id": "301", "x": 5, "side": "left", "width": 1.5, "corridorDir": "left" },
-    { "id": "302", "x": 10, "side": "left", "width": 1.5, "corridorDir": "left" },
-    { "id": "303", "x": 11, "side": "left", "width": 1.8, "corridorDir": "left" },
-    { "id": "304", "x": 14, "side": "left", "width": 1.5, "corridorDir": "left" },
-    { "id": "305", "x": 17, "side": "left", "width": 1.5, "corridorDir": "left" },
+    { "id": "302", "x": 7, "side": "left", "width": 1.5, "corridorDir": "left" },
+    { "id": "303", "x": 10, "side": "left", "width": 1.8, "corridorDir": "left" },
+    { "id": "304", "x": 13, "side": "left", "width": 1.5, "corridorDir": "left" },
+    { "id": "305", "x": 16, "side": "left", "width": 1.5, "corridorDir": "left" },
     { "id": "306", "x": 20, "side": "left", "width": 1.8, "corridorDir": "left" },
 
     { "id": "307", "x": 1, "side": "left", "width": 1.5, "corridorDir": "right" },
