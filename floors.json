@@ -45,7 +45,7 @@
     { "id": "212", "x": 16, "side": "right", "width": 1.5, "corridorDir": "right" },
     { "id": "213", "x": 15, "side": "left", "width": 1.8, "corridorDir": "right" },
     { "id": "214", "x": 20, "side": "left", "width": 1.5, "corridorDir": "right" },
-    { "id": "215", "x": 23, "side": "left", "width": 1.8, "corridorDir": "right" },
+    { "id": "215", "x": 22.5, "side": "left", "width": 1.8, "corridorDir": "right" },
     { "id": "216", "x": 26.5, "side": "left", "width": 1.5, "corridorDir": "right" },
     { "id": "Erkaklar hojatxonasi", "x": 22.5, "side": "right", "width": 1.8, "corridorDir": "right" },
     { "id": "Ayollar hojatxonasi", "x": 25, "side": "right", "width": 1.8, "corridorDir": "right" }
