@@ -3,56 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yuklanmoqda...</title>
+    <title>Tizim tekshiruvi</title>
     <style>
-        body { background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+        body { background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif; color: white; margin: 0; }
+        
+        /* Loader */
         .loader { width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid #00d2ff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #status { color: #888; font-size: 0.9rem; }
+        
+        #status { color: #888; font-size: 0.9rem; margin-top: 10px; }
+
+        /* Xatolik Oynasi (Boshida yashirin) */
+        #error-screen {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f0f0f;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 30px; z-index: 10;
+        }
+        .icon-error { font-size: 4rem; margin-bottom: 20px; }
+        h2 { margin: 0 0 10px 0; color: #ff4444; }
+        p { color: #aaa; line-height: 1.5; font-size: 1.1rem; }
     </style>
 </head>
 <body>
-    <div class="loader"></div>
-    <div id="status">Tizim aniqlanmoqda...</div>
+
+    <div id="loading-screen" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="loader"></div>
+        <div id="status">Sensorlar tekshirilmoqda...</div>
+    </div>
+
+    <div id="error-screen">
+        <div class="icon-error">⚠️</div>
+        <h2>Datchik topilmadi</h2>
+        <p>
+            Sizning qurilmangizda <b>Giroskop</b> yoki <b>AR sensorlari</b> mavjud emas.
+            <br><br>
+            Navigatsiya ishlashi uchun zamonaviy smartfon kerak.
+        </p>
+    </div>
 
     <script>
         const params = window.location.search;
         const statusDiv = document.getElementById('status');
+        const loadingScreen = document.getElementById('loading-screen');
+        const errorScreen = document.getElementById('error-screen');
 
         function redirect(mode) {
-            statusDiv.innerText = (mode === 'ar' ? "Pro" : "Lite") + " versiya yuklanmoqda...";
+            statusDiv.innerText = (mode === 'ar' ? "Pro (Yurish)" : "Lite (Aylanish)") + " rejimi yuklanmoqda...";
             setTimeout(() => {
                 window.location.replace(mode + "/index.html" + params);
-            }, 100);
+            }, 500);
         }
 
-        async function checkSystem() {
-            // 1. IPHONE / IPAD TEKSHIRUVI (Eng muhimi shu)
-            // iPhone WebXR da qiynaladi, shuning uchun uni darrov Lite ga olamiz.
-            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            if (isIOS) {
+        async function detectSensorsAndRedirect() {
+            
+            // 1-BOSQICH: YURISHNI SEZADIMI? (6DoF / WebXR)
+            // Bu odatda kuchli Androidlar uchun true beradi.
+            // iPhone (hozircha) WebXR ni to'liq qo'llamagani uchun false beradi.
+            let supportsWalking = false;
+
+            if ('xr' in navigator) {
+                try {
+                    // "immersive-ar" bu - yurish, joy o'zgarishini kuzatish rejimi
+                    supportsWalking = await navigator.xr.isSessionSupported('immersive-ar');
+                } catch (e) {
+                    console.log("WebXR check failed");
+                }
+            }
+
+            if (supportsWalking) {
+                // Agar yurishni sezsa -> PRO
+                redirect('ar');
+                return;
+            }
+
+            // 2-BOSQICH: FAQAT AYLANISHNI SEZADIMI? (3DoF / Gyroscope)
+            // iPhone va oddiy Androidlar shu yerga tushadi.
+            // Biz "DeviceOrientationEvent" bor-yo'qligini tekshiramiz.
+            
+            // Eslatma: Ba'zi kompyuterlarda ham bu object bo'lishi mumkin, lekin datchik ishlamaydi.
+            // Lekin mobil brauzerlarning 99% ida bu mavjud.
+            let supportsRotation = false;
+
+            if (window.DeviceOrientationEvent) {
+                supportsRotation = true;
+            }
+
+            if (supportsRotation) {
+                // Agar faqat aylanishni sezsa -> LITE
                 redirect('lite');
                 return;
             }
 
-            // 2. ANDROID VA BOSHQALAR
-            if ('xr' in navigator) {
-                try {
-                    const isSupported = await navigator.xr.isSessionSupported('immersive-ar');
-                    if (isSupported) {
-                        redirect('ar');
-                    } else {
-                        redirect('lite');
-                    }
-                } catch (e) {
-                    redirect('lite');
-                }
-            } else {
-                redirect('lite');
-            }
+            // 3-BOSQICH: HECH QAYSISI YO'Q (Noutbuk yoki juda eski telefon)
+            showError();
         }
 
-        checkSystem();
+        function showError() {
+            loadingScreen.style.display = 'none';
+            errorScreen.style.display = 'flex';
+        }
+
+        // Tekshiruvni boshlash
+        detectSensorsAndRedirect();
+
     </script>
 </body>
 </html>
