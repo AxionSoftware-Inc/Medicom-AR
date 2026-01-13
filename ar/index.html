@@ -10,56 +10,151 @@
 
     <style>
         /* --- DIZAYN (O'zgarmadi) --- */
-        body { margin: 0; background: #000; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        
-        #ui-container { position: fixed; inset: 0; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
-        #ui-container>* { pointer-events: auto; }
+        body {
+            margin: 0;
+            background: #000;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        #ui-container {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #ui-container>* {
+            pointer-events: auto;
+        }
 
         #start-screen {
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); padding: 25px;
-            border-radius: 24px; text-align: center; color: white; border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 90%; max-width: 380px; display: flex; flex-direction: column; align-items: center;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            border-radius: 24px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         #camera-preview-box {
-            width: 220px; height: 220px; background: #000; border-radius: 20px; margin: 15px 0;
-            overflow: hidden; border: 3px solid #ffd700; position: relative;
+            width: 220px;
+            height: 220px;
+            background: #000;
+            border-radius: 20px;
+            margin: 15px 0;
+            overflow: hidden;
+            border: 3px solid #ffd700;
+            position: relative;
         }
-        #preview-video { width: 100%; height: 100%; object-fit: cover; }
+
+        #preview-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         .scan-overlay {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 80%; height: 80%; border: 2px dashed rgba(255, 255, 255, 0.7); border-radius: 12px; pointer-events: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            border: 2px dashed rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            pointer-events: none;
         }
 
         .btn-start {
-            background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 16px 0; color: white;
-            font-size: 1.1rem; font-weight: bold; border-radius: 16px; margin-top: 15px; cursor: pointer; width: 100%;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            border: none;
+            padding: 16px 0;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 16px;
+            margin-top: 15px;
+            cursor: pointer;
+            width: 100%;
         }
 
         #room-list {
-            display: none; width: 90%; max-height: 60vh; overflow-y: auto; background: rgba(15, 23, 42, 0.9);
-            border-radius: 20px; padding: 15px; margin-top: 10px;
+            display: none;
+            width: 90%;
+            max-height: 60vh;
+            overflow-y: auto;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 10px;
         }
+
         .room-item {
-            background: rgba(255, 255, 255, 0.05); padding: 16px; margin-bottom: 10px; border-radius: 14px;
-            color: white; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 14px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
         }
 
         #hud {
-            display: none; position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7); padding: 8px 20px; border-radius: 30px; color: #00ff9d;
-            font-weight: bold; font-size: 1.1rem; backdrop-filter: blur(5px);
+            display: none;
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #00ff9d;
+            font-weight: bold;
+            font-size: 1.1rem;
+            backdrop-filter: blur(5px);
         }
 
         #nav-hint-box {
-            display: none; position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8); padding: 12px 24px; border-radius: 16px; text-align: center; color: white;
+            display: none;
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px 24px;
+            border-radius: 16px;
+            text-align: center;
+            color: white;
         }
 
         #btn-close {
-            display: none; position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.2);
-            width: 40px; height: 40px; border-radius: 50%; border: none; color: white; font-weight: bold;
-            font-size: 1.2rem; cursor: pointer; z-index: 1000;
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -92,11 +187,9 @@
     <div id="hud"><span id="dist-val">0.0</span> m</div>
     <div id="nav-hint-box"><span id="nav-hint-text" style="font-weight: bold;"></span></div>
 
-    <a-scene 
-        webxr="requiredFeatures: local-floor, dom-overlay; overlayElement: #ui-container"
-        renderer="antialias: true; colorManagement: true;" 
-        vr-mode-ui="enabled: false"
-        fps-check> <a-camera id="cam" position="0 1.6 0"></a-camera>
+    <a-scene webxr="requiredFeatures: local-floor, dom-overlay; overlayElement: #ui-container"
+        renderer="antialias: true; colorManagement: true;" vr-mode-ui="enabled: false" fps-check> <a-camera id="cam"
+            position="0 1.6 0"></a-camera>
         <a-entity id="ar-world" position="0 0 0"></a-entity>
     </a-scene>
 
@@ -161,18 +254,42 @@
 
         // 3. BOSHLASH TUGMASI (AR START)
         document.getElementById('start-btn').onclick = async () => {
+            // A. Previewni o'chirish
             if (previewStream) {
                 previewStream.getTracks().forEach(track => track.stop());
                 previewVideo.srcObject = null;
             }
 
+            const scene = document.querySelector('a-scene');
+            const startBtn = document.getElementById('start-btn');
+
+            // Tugmani bosib bo'lmaydigan qilib qo'yamiz va yozuvini o'zgartiramiz
+            startBtn.disabled = true;
+            startBtn.innerText = "YUKLANMOQDA...";
+            startBtn.style.background = "#555";
+
+            // --- MUHIM QISM: SUG'URTA (WATCHDOG) ---
+            // Agar 4 soniyada AR ishga tushmasa, Lite ga haydaymiz
+            const watchdog = setTimeout(() => {
+                alert("Kamerangiz AR rejimini ko'tara olmadi. Lite rejimga o'tilmoqda.");
+                window.location.replace("../lite/index.html" + window.location.search);
+            }, 4000);
+
             try {
-                const scene = document.querySelector('a-scene');
-                await scene.enterAR(); 
+                // AR ga kirishga urinish
+                await scene.enterAR();
+
+                // Agar muvaffaqiyatli kirsa, taymerni o'chiramiz
+                clearTimeout(watchdog);
+
+                // UI ni o'zgartiramiz
                 startScreen.style.display = 'none';
                 roomList.style.display = 'block';
+
             } catch (e) {
-                // Agar AR ishlamasa -> Lite ga
+                // Xatolik bo'lsa
+                clearTimeout(watchdog);
+                console.warn("AR Error:", e);
                 window.location.replace("../lite/index.html" + window.location.search);
             }
         };
@@ -237,10 +354,10 @@
             const isDoorLeft = (room.side === 'left' || room.door === 'left');
             let sideRot, facingUserY;
 
-            if (isLeftCorridor) { 
+            if (isLeftCorridor) {
                 sideRot = isDoorLeft ? 90 : -90;
                 facingUserY = 90;
-            } else { 
+            } else {
                 sideRot = isDoorLeft ? 90 : -90;
                 facingUserY = -90;
             }
@@ -251,8 +368,8 @@
             const text = document.createElement('a-text');
             text.setAttribute('value', room.id);
             text.setAttribute('align', 'center');
-            text.setAttribute('scale', '6 6 6'); 
-            text.setAttribute('position', '0 1.2 0.1'); 
+            text.setAttribute('scale', '6 6 6');
+            text.setAttribute('position', '0 1.2 0.1');
             text.setAttribute('color', 'white');
             text.setAttribute('rotation', `0 ${facingUserY} 0`);
 
@@ -266,9 +383,9 @@
             init: function () {
                 this.frames = 0;
                 this.prevTime = Date.now();
-                this.lowFpsCount = 0; 
+                this.lowFpsCount = 0;
                 this.startTime = Date.now();
-                this.checkInterval = 1000; 
+                this.checkInterval = 1000;
             },
             tick: function () {
                 this.frames++;
@@ -277,9 +394,9 @@
 
                 if (time >= this.prevTime + this.checkInterval) {
                     const fps = Math.round((this.frames * 1000) / (time - this.prevTime));
-                    
+
                     if (fps < 15) this.lowFpsCount++;
-                    else this.lowFpsCount = 0; 
+                    else this.lowFpsCount = 0;
 
                     if (this.lowFpsCount >= 3) { // 3 marta past FPS
                         this.el.pause();
@@ -296,11 +413,11 @@
         AFRAME.registerComponent('nav-logic', {
             tick: function () {
                 if (!isNavigating || !targetData) return;
-                
+
                 const camPos = this.el.camera.el.object3D.position;
                 const isLeft = (targetData.corridor === 'left' || targetData.corridorDir === 'left');
                 const targetX = targetData.x * (isLeft ? -1 : 1);
-                
+
                 const distRem = Math.abs(targetX - camPos.x);
                 distVal.innerText = distRem.toFixed(1); // HUD ga yozish
 
@@ -326,4 +443,5 @@
         }
     </script>
 </body>
+
 </html>
