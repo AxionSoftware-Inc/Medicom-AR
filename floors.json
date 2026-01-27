@@ -18,7 +18,7 @@
     { "id": "116", "x": 21, "side": "left", "width": 1.8, "corridorDir": "right" },
     { "id": "117", "x": 23, "side": "left", "width": 1.8, "corridorDir": "right" },
     { "id": "118", "x": 27, "side": "left", "width": 1.8, "corridorDir": "right" },
-    { "id": "119", "x": 25, "side": "left", "width": 1.8, "corridorDir": "left" },
+    { "id": "119", "x": 27, "side": "right", "width": 1.8, "corridorDir": "left" },
     { "id": "120", "x": 27, "side": "right", "width": 1.8, "corridorDir": "left" },
     { "id": "121", "x": 31.5, "side": "left", "width": 1.8, "corridorDir": "left" },
     { "id": "122", "x": 27, "side": "right", "width": 1.8, "corridorDir": "left" },
